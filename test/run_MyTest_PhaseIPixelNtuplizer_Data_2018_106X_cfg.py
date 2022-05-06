@@ -95,7 +95,7 @@ opt.register('globalTag',          '',
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
 	     'Global Tag, Default="" which uses auto:run2_data')
 
-opt.register('dataTier',           'RECO',
+opt.register('dataTier',           'ALCARECO',
              opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
              'Input file data tier')
 
