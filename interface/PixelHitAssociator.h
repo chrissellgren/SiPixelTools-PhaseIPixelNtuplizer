@@ -15,10 +15,6 @@
  *
  ************************************************************/
 
-#ifndef CMSSW_VERSION
-#define CMSSW_VERSION 113
-#endif
-
 //#include <vector>
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"

@@ -4,8 +4,6 @@
 #define ADD_SIM_INFO 0
 #define ADD_NEW_MUON_SELECTORS 1 // Works in 9_4_X, 10_6_X or later
 
-#define CMSSW_VERSION 113
-
 /*
 #define ADD_SIM_INFO 1
 #define ADD_CHECK_PLOTS_TO_NTUPLE

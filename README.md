@@ -3,17 +3,17 @@
 
 ### &#x1F539; Base recipe:
 
+#### CMSSW_10_6_X
+
 ```bash
 export SCRAM_ARCH=slc7_amd64_gcc700
-cmsrel CMSSW_10_6_8_patch1
-cd CMSSW_10_6_8_patch1/src
+cmsrel CMSSW_10_6_30
+cd CMSSW_10_6_30/src
 cmsenv
 # git cms-init #optional, use this, if you want to check out CMSSW packages later
 git clone https://github.com/CMSTrackerDPG/SiPixelTools-PhaseIPixelNtuplizer SiPixelTools/PhaseIPixelNtuplizer
 cd SiPixelTools/PhaseIPixelNtuplizer
-sed -i "s;CMSSW_VERSION 113;CMSSW_VERSION 106;" plugins/PhaseIPixelNtuplizer.h
-sed -i "s;CMSSW_VERSION 113;CMSSW_VERSION 106;" interface/PixelHitAssociator.h
-scram b -j 8
+scram b -j 8 USER_CXXFLAGS="-DCMSSW_VERSION=106"
 ```
 
 ### &#x1F539; Running on ALCARECO
