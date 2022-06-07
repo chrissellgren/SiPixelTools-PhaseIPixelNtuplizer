@@ -16,6 +16,71 @@ cd SiPixelTools/PhaseIPixelNtuplizer
 scram b -j 8 USER_CXXFLAGS="-DCMSSW_VERSION=106"
 ```
 
+#### CMSSW_11_0_X
+
+```bash
+export SCRAM_ARCH=slc7_amd64_gcc820
+cmsrel CMSSW_11_0_4
+cd CMSSW_11_0_4/src
+cmsenv
+# git cms-init #optional, use this, if you want to check out CMSSW packages later
+git clone https://github.com/CMSTrackerDPG/SiPixelTools-PhaseIPixelNtuplizer SiPixelTools/PhaseIPixelNtuplizer
+cd SiPixelTools/PhaseIPixelNtuplizer
+scram b -j 8 USER_CXXFLAGS="-DCMSSW_VERSION=110"
+```
+
+#### CMSSW_11_3_X
+
+```bash
+export SCRAM_ARCH=slc7_amd64_gcc900
+cmsrel CMSSW_11_3_4
+cd CMSSW_11_3_4/src
+cmsenv
+# git cms-init #optional, use this, if you want to check out CMSSW packages later
+git clone https://github.com/CMSTrackerDPG/SiPixelTools-PhaseIPixelNtuplizer SiPixelTools/PhaseIPixelNtuplizer
+cd SiPixelTools/PhaseIPixelNtuplizer
+scram b -j 8 USER_CXXFLAGS="-DCMSSW_VERSION=113"
+```
+
+#### CMSSW_12_0_X
+
+```bash
+export SCRAM_ARCH=slc7_amd64_gcc900
+cmsrel CMSSW_12_0_4
+cd CMSSW_12_0_4/src
+cmsenv
+# git cms-init #optional, use this, if you want to check out CMSSW packages later
+git clone https://github.com/CMSTrackerDPG/SiPixelTools-PhaseIPixelNtuplizer SiPixelTools/PhaseIPixelNtuplizer
+cd SiPixelTools/PhaseIPixelNtuplizer
+scram b -j 8 USER_CXXFLAGS="-DCMSSW_VERSION=120"
+```
+
+#### CMSSW_12_1_X
+
+```bash
+export SCRAM_ARCH=slc7_amd64_gcc900
+cmsrel CMSSW_12_1_1
+cd CMSSW_12_1_1/src
+cmsenv
+# git cms-init #optional, use this, if you want to check out CMSSW packages later
+git clone https://github.com/CMSTrackerDPG/SiPixelTools-PhaseIPixelNtuplizer SiPixelTools/PhaseIPixelNtuplizer
+cd SiPixelTools/PhaseIPixelNtuplizer
+scram b -j 8 USER_CXXFLAGS="-DCMSSW_VERSION=121"
+```
+
+#### CMSSW_12_3_X
+
+```bash
+export SCRAM_ARCH=slc7_amd64_gcc10
+cmsrel CMSSW_12_3_4_patch3
+cd CMSSW_12_3_4_patch3/src
+cmsenv
+# git cms-init #optional, use this, if you want to check out CMSSW packages later
+git clone https://github.com/CMSTrackerDPG/SiPixelTools-PhaseIPixelNtuplizer SiPixelTools/PhaseIPixelNtuplizer
+cd SiPixelTools/PhaseIPixelNtuplizer
+scram b -j 8 USER_CXXFLAGS="-DCMSSW_VERSION=123"
+```
+
 ### &#x1F539; Running on ALCARECO
 Runs on RECO also, but ALCARECO is the new default since 2021 summer
 
