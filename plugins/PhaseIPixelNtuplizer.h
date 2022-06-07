@@ -19,7 +19,11 @@
 
 // CMSSW code
 #include "FWCore/Framework/interface/Frameworkfwd.h"
+#if CMSSW_VERSION >= 123
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+#else
 #include "FWCore/Framework/interface/EDAnalyzer.h"
+#endif
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -120,7 +124,11 @@
 #define EDM_ML_LOGDEBUG
 #define ML_DEBUG
 
+#if CMSSW_VERSION >= 123
+class PhaseIPixelNtuplizer : public edm::one::EDAnalyzer<>
+#else
 class PhaseIPixelNtuplizer : public edm::EDAnalyzer
+#endif
 {
   using LumisectionCount = int;
     static constexpr int                  ZEROBIAS_TRIGGER_BIT           = 0;
@@ -184,6 +192,18 @@ private:
   std::vector<std::string>               triggerNames_;
   edm::InputTag                          triggerTag_;
   std::map<uint32_t, int>                federrors_;
+
+#if CMSSW_VERSION >= 123
+  edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> trackBuilderToken_;
+  edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> trackerTopologyToken_;
+  edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> trackerGeometryToken_;
+  edm::ESGetToken<Propagator, TrackingComponentsRecord> propagatorToken_;
+  edm::ESGetToken<MeasurementTracker, CkfComponentsRecord> measurementTrackerToken_;
+  edm::ESGetToken<Chi2MeasurementEstimatorBase, TrackingComponentsRecord> chi2MeasurementEstimatorToken_;
+  edm::ESGetToken<PixelClusterParameterEstimator, TkPixelCPERecord> pixelClusterParameterEstimatorToken_;
+  edm::ESGetToken<SiPixelFedCablingMap, SiPixelFedCablingMapRcd> cablingMapToken_;
+#endif
+
   // Trees
   TTree* eventTree_;
   TTree* lumiTree_;
