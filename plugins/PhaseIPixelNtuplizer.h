@@ -125,7 +125,7 @@
 #define ML_DEBUG
 
 #if CMSSW_VERSION >= 123
-class PhaseIPixelNtuplizer : public edm::one::EDAnalyzer<>
+class PhaseIPixelNtuplizer : public edm::one::EDAnalyzer<edm::one::WatchLuminosityBlocks, edm::one::WatchRuns>
 #else
 class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 #endif
@@ -150,13 +150,13 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 public:
   PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
   virtual ~PhaseIPixelNtuplizer();
-  virtual void beginJob();
-  virtual void endJob();
-  virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-  virtual void endRun(edm::Run const&, edm::EventSetup const&);
-  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+  virtual void beginJob() override;
+  virtual void endJob() override;
+  virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) override;
+  virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
+  virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
+  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
 private:
   edm::ParameterSet iConfig_;
