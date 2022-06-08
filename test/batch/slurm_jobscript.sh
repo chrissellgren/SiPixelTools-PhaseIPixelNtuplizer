@@ -65,13 +65,13 @@ echo "--------------------------------------------------------------------------
 echo "                          Creating JOB ["$4"]"
 echo
 
-export SCRAM_ARCH=slc7_amd64_gcc700
+export SCRAM_ARCH=slc7_amd64_gcc10
 cd ${TMPDIR}
 
 scramv1 project CMSSW $2
 cd $2/src
 eval `scram runtime -sh`
-git clone https://github.com/TizianoBevilacqua/SiPixelTools-PhaseIPixelNtuplizer.git SiPixelTools/PhaseIPixelNtuplizer
+git clone https://github.com/CMSTrackerDPG/SiPixelTools-PhaseIPixelNtuplizer SiPixelTools/PhaseIPixelNtuplizer
 cd SiPixelTools/PhaseIPixelNtuplizer
 
 # output file
@@ -83,9 +83,8 @@ echo "                                JOB ["$4"] ready"
 echo "                                    Compiling..."
 echo
 
-sed -i "s;CMSSW_VERSION 113;CMSSW_VERSION 106;" plugins/PhaseIPixelNtuplizer.h
-sed -i "s;CMSSW_VERSION 113;CMSSW_VERSION 106;" interface/PixelHitAssociator.h
-scram b -j 4
+VER=$(echo $CMSSW_VERSION | sed "s:CMSSW::g" | sed "s:\_::g" | cut -c 1-3)
+scram b -j 8 USER_CXXFLAGS="-DCMSSW_VERSION=$VER"
 
 echo
 echo "--------------------------------------------------------------------------------"
@@ -93,13 +92,13 @@ echo "                                 Compiling ready"
 echo "                               Starting JOB ["$4"]"
 echo
 
-if [[ $#argv > 7 ]]; then
+if [[ $# > 9 ]]; then
     echo $#
-    echo "cmsRun test/run_MyTest_PhaseIPixelNtuplizer_Data_2018_106X_cfg.py globalTag=$3 dataTier=ALCARECO inputFileName=$5 outputFileName=$output maxEvents=$7\n"
-    cmsRun test/run_MyTest_PhaseIPixelNtuplizer_Data_2018_106X_cfg.py dataTier=ALCARECO  globalTag=$3 outputFileName=$output inputFileName=$5 maxEvents=$7
+    echo "cmsRun $7 globalTag=$3 dataTier=$8 inputFileName=$5 outputFileName=$output maxEvents=$9\n"
+    cmsRun $7 dataTier=$8  globalTag=$3 outputFileName=$output inputFileName=$5 maxEvents=$9
 else
-    echo "cmsRun test/run_MyTest_PhaseIPixelNtuplizer_Data_2018_106X_cfg.py globalTag=$3 dataTier=ALCARECO inputFileName=$5 outputFileName=$output maxEvents=-1\n"
-    cmsRun test/run_MyTest_PhaseIPixelNtuplizer_Data_2018_106X_cfg.py dataTier=ALCARECO  globalTag=$3 outputFileName=$output inputFileName=$5 maxEvents=-1
+    echo "cmsRun $7 globalTag=$3 dataTier=$8 inputFileName=$5 outputFileName=$output maxEvents=-1\n"
+    cmsRun $7 dataTier=$8  globalTag=$3 outputFileName=$output inputFileName=$5 maxEvents=-1
 fi
 
 
