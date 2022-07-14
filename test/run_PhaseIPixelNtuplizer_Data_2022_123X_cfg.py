@@ -286,7 +286,7 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     # information to save
     eventSaveDownscaleFactor       = cms.untracked.int32(opt.prescale),
     trackSaveDownscaleFactor       = cms.untracked.int32(1),
-    clusterSaveDownscaleFactor     = cms.untracked.int32(1),
+    clusterSaveDownscaleFactor     = cms.untracked.int32(100),
     saveDigiTree                   = cms.untracked.bool(False),
     saveTrackTree                  = cms.untracked.bool(True),
     saveNonPropagatedExtraTrajTree = cms.untracked.bool(False),
