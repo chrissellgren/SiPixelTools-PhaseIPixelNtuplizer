@@ -527,7 +527,7 @@ else:
 #---------------------------
 
 # Modify Schedule
-if opt.dataTier == 'RECO' or opt.dataTier == 'FEVT' or opt.dataTier == 'ALCARECO' or opt.dataTier == 'RAW':
+if opt.dataTier == 'RECO' or opt.dataTier == 'FEVT' or opt.dataTier == 'ALCARECO':
     #process.schedule = cms.Schedule(process.myAnalyzer_step)
     process.schedule = cms.Schedule(
 	process.TrackRefitter_step,
