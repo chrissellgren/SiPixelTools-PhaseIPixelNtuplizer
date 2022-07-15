@@ -125,7 +125,8 @@ ls -l $USERDIR/$output
 
 cd ../../../..
 rm -rf $2
-
+cd ..
+rm -r ${SLURM_JOB_NAME}_${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}
 echo
 echo "--------------------------------------------------------------------------------"
 echo "                                 JOB ["$4"] DONE"

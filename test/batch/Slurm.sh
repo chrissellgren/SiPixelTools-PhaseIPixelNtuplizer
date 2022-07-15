@@ -86,14 +86,14 @@
 USERDIR="/pnfs/psi.ch/cms/trivcat/store/user/bevila_t/test2/phys/xpluscharm/pixeltest"
 
 echo "Usage: "> Usage
-echo "Batch.sh [TaskDir] -create [InputFile] [JobScript] [CMSSW_Version] [GlobalTag] [outdir] [python config] [datatier]">> Usage
-echo "Batch.sh [TaskDir] -submit">> Usage
-echo "Batch.sh [TaskDir] -status">> Usage
-echo "Batch.sh [TaskDir] -missing">> Usage
-echo "Batch.sh [TaskDir] -resubmit [list]">> Usage
-echo "Batch.sh [TaskDir] -resubmit_missing">> Usage
-echo "Batch.sh [TaskDir] -copy_to_kfki">> Usage
-echo "Batch.sh [TaskDir] -delete">> Usage
+echo "Slurm.sh [TaskDir] -create [InputFile] [JobScript] [CMSSW_Version] [GlobalTag] [outdir] [python config] [datatier]">> Usage
+echo "Slurm.sh [TaskDir] -submit">> Usage
+echo "Slurm.sh [TaskDir] -status">> Usage
+echo "Slurm.sh [TaskDir] -missing">> Usage
+echo "Slurm.sh [TaskDir] -resubmit [list]">> Usage
+echo "Slurm.sh [TaskDir] -resubmit_missing">> Usage
+echo "Slurm.sh [TaskDir] -copy_to_kfki">> Usage
+echo "Slurm.sh [TaskDir] -delete">> Usage
 
 
 if [ "${1}" == "" ]; then
@@ -192,8 +192,6 @@ elif [ "$OPT" == "-status" ]; then
     PEND=`wc -l Pending | awk '{ print $1}'`
     RUN=`wc -l Running | awk '{ print $1}'`
     ( ls $USERDIR/$1 | grep .root > Completed ) >  /dev/null
-    #( ls $USERDIR/test_out | grep .root > Completed ) >  /dev/null
-    #( lcg-ls -b -D srmv2 --vo cms srm://grid143.kfki.hu:8446/srm/managerv2\?SFN=/dpm/kfki.hu/home/cms/phedex/store/user/$USERDIR_KFKI/$1 | grep .root | sed "s;/; ;g" | awk '{ print $NF }' >> Completed ) > /dev/null
     sort -u Completed > Comp
     mv Comp Completed
     COMP=`wc -l Completed | awk '{ print $1}'`
@@ -230,17 +228,17 @@ elif [ "$OPT" == "-missing" ]; then
     diff Seq jobnums | grep "<" | awk '{ printf "%d,", $2 }' | sed 's;,$;\n;'
     rm Seq jobnums output
 elif [ "$OPT" == "-resubmit" ]; then
-    if [ ${3} == "" ]; then
-	echo "No Jobs specified"
+    if [ "${3}"  == "" ]; then
+	    echo "No Jobs specified"
     else
-	echo "cd "$TASKDIR > $TASKDIR/resub.sh
-	echo ${3} | tr ',' '\n' > list
-	echo "" > list2
-	for a in $( `cat list` ); do
-	    echo $a | grep -v "-" >> list2
-	    eval `echo $a | grep - | sed 's;^;seq ;;s;-; ;'` >> list2
+	    echo "cd "$TASKDIR > $TASKDIR/resub.sh
+	    echo ${3} | tr ',' '\n' > list
+	    echo "" > list2
+	    for a in $( cat list ); do
+	        echo $a | grep -v "-" >> list2
+	        eval `echo $a | grep - | sed 's;^;seq ;;s;-; ;'` >> list2
 	done
-	for a in $( `cat list2` ); do
+	for a in $( cat list2 ); do
 	    sed -n $a'p' $TASKDIR/alljobs.sh >> $TASKDIR/resub.sh
 	done
 	rm list list2
@@ -254,8 +252,9 @@ elif [ "$OPT" == "-resubmit_missing" ]; then
     seq 1 $NJOBS > Seq
     diff Seq jobnums | grep "<" | awk '{ print $2 }' > Missing
     echo "cd "$TASKDIR > $TASKDIR/resub.sh
-    for a in $( `cat Missing` ); do
-	cat $TASKDIR/alljobs.sh | head -$a | tail -1 >> $TASKDIR/resub.sh
+    for a in $( cat Missing ); do
+        echo $a
+	    cat $TASKDIR/alljobs.sh | head -$a | tail -1 >> $TASKDIR/resub.sh
     done
     rm Seq jobnums output Missing
     echo "cd -" >> $TASKDIR/resub.sh
