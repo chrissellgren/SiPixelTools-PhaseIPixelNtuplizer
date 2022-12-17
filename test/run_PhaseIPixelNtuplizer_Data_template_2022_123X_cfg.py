@@ -239,8 +239,8 @@ else:
                                     )
 
 # Select good lumi sections
-import FWCore.PythonUtilities.LumiList as LumiList
-process.source.lumisToProcess = LumiList.LumiList(filename = '___EXCHANGE___CERTJSON___').getVLuminosityBlockRange()
+#import FWCore.PythonUtilities.LumiList as LumiList
+#process.source.lumisToProcess = LumiList.LumiList(filename = '___EXCHANGE___CERTJSON___').getVLuminosityBlockRange()
 
 # Fix problem with default config
 process.options = cms.untracked.PSet(
