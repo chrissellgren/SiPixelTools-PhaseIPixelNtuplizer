@@ -1,6 +1,69 @@
 #include "PhaseIPixelNtuplizer.h"
 #include "TVector.h"
 
+/*
+#include <stdlib.h> 
+#include <stdio.h>
+#include <math.h>
+#include <algorithm>
+#include <vector>
+#include "boost/multi_array.hpp"
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <fstream>
+#include <sys/time.h>
+
+#include "pixelTree.h"
+
+#include <cmath>
+#include <cstdlib>
+
+#include "TROOT.h"
+#include "Math/Vavilov.h"
+#include "Math/VavilovAccurate.h"
+#include "Math/SpecFuncMathCore.h"
+#include "Math/SpecFuncMathMore.h"
+
+#include "TStyle.h"
+#include "TH1.h"
+#include "TF1.h"
+#include "TH2.h" 
+#include "TProfile.h" 
+#include "TVector3.h"
+#include "TSystem.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TObject.h"
+#include "TCanvas.h"
+#include "TPostScript.h"
+
+// user include files
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+
+#include "FWCore/Framework/interface/Event.h"
+#include <FWCore/Framework/interface/EventSetup.h>
+#include "FWCore/Framework/interface/MakerMacros.h"
+
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h" */
+
+// includes for the q correction
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+
+#include "RecoLocalTracker/SiPixelRecHits/src/PixelCPEBase.cc"
+#include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEBase.h"
+#include "RecoLocalTracker/SiPixelRecHits/src/SiPixelTemplateReco.cc"
+//#include "RecoLocalTracker/SiPixelRecHits/src/SiPixelTemplateReco2D.cc"
+#include "CalibTracker/Records/interface/SiPixelTemplateDBObjectESProducerRcd.h"
+//#include "CalibTracker/Records/interface/SiPixel2DTemplateDBObjectESProducerRcd.h"
+
 constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_TRIGGER_BIT;
 constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_BITMASK;
 constexpr int                  PhaseIPixelNtuplizer::VERTEX_NUMTRACK_CUT_VAL;
@@ -715,6 +778,28 @@ void PhaseIPixelNtuplizer::getEvtData
     }
   }
 
+    // make the template object to draw the correction factor
+    // need to define a token that will connect the record to the object
+    // token is like a bridge bw the database object(record)
+
+  // Initialize 1D templates
+  //const SiPixelTemplateDBObject* templateDBobject_;
+  /*edm::ESHandle<SiPixelTemplateDBObject> templateDBobject;
+  iSetup.get<SiPixelTemplateDBObjectESProducerRcd>().get(templateDBobject); */
+  // from PR token
+  /*const edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
+  const auto templateDBobject = &iSetup.getData(templateDBobjectToken_);
+  // 
+  //templateDBobject_ = templateDBobject.product();
+  std::vector< SiPixelTemplateStore > thePixelTemp_;
+  SiPixelTemplate templ(thePixelTemp_);
+
+  cout << " ---------  PixelCPETemplateReco: Loading templates from database (DB) --------- " << endl;
+
+  if (!SiPixelTemplate::pushfile(*templateDBobject_, thePixelTemp_))
+      cout << "\nERROR: Templates not filled correctly. Check the sqlite file. Using SiPixelTemplateDBObject version "
+        << (*templateDBobject_).version() << "\n\n"; */
+
   // Fill the tree
   eventTree_ -> Fill();
 
@@ -899,6 +984,57 @@ void PhaseIPixelNtuplizer::getClustData
 
   const edmNew::DetSetVector<SiPixelCluster>& currentClusterCollection = *clusterCollectionHandle;
 
+/*
+
+  static float qscale, qscaleB, qscaleF;
+  qscaleB=1., qscaleF=1.;
+  printf("bpix scale factor = %f, fpix scale factor = %f \n", qscaleB, qscaleF);
+
+  bpix = true;
+        if(ana->ClDisk[iCl] < -10) {
+          qscale = qscaleB;
+          layer = ana->ClLayer[iCl];
+          }
+
+        else {
+          bpix = false;
+          qscale = qscaleF; } */
+    
+  // template analysis
+  /* 1D templat analysis
+          SiPixelTemplateReco::ClusMatrix clusterPayload{&cluster[0][0], xdouble, ydouble, mrow,mcol};
+          locBx = 1.;
+          if(cotbeta < 0.) locBx = -1.;
+          locBz = locBx;
+          if(cotalpha < 0.) locBz = -locBx;
+          
+          int TemplID1 = -9999;
+          TemplID1 = templateDBobject_->getTemplateID(ana->ClDetId[iCl]);
+          templ.interpolate(TemplID1, 0.f, 0.f, 1.f, 1.f); */
+
+
+// need to find the name of all of these variables
+// look around for the cluster information
+// if not, we can calculate it ourselves (z/x)
+// defined in HSCP
+          // Running the actualy 1D Template Reco
+          /*ierr = PixelTempReco1D(TemplID1,
+                                 cotalpha, 
+                                 cotbeta, 
+                                 locBz, 
+                                 locBx, 
+                                 clusterPayload, 
+                                 templ, 
+                                 yrec, 
+                                 sigmay, 
+                                 proby, 
+                                 xrec, 
+                                 sigmax, 
+                                 probx, 
+                                 qbin, 
+                                 speed, 
+                                 probQ);   */
+
   // Looping on clusters with the same location
   using clustCollIt_t = edmNew::DetSetVector<SiPixelCluster>::const_iterator;
   for( clustCollIt_t currentClusterSetIt = currentClusterCollection.begin();
@@ -954,6 +1090,12 @@ void PhaseIPixelNtuplizer::getClustData
 
       // Charge
       clu_.charge = currentCluster.charge();
+      // corrected charge
+      // corrFactor = (templ.qscale())/templ.r_qMeas_qTrue();
+      //clu_.charge_corr = currentCluster.charge * corrFactor;
+      //templ.qscale()
+      clu_.charge_corr = 1;
+
       // Misc.
       for(int i = 0; i < clu_.size && i < 1000; ++i) {
 	const auto& currentPixels = currentCluster.pixels();
