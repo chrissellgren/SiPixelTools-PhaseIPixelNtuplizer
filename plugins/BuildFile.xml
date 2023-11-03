@@ -21,38 +21,27 @@
   <use   name="DataFormats/VertexReco"/>
   <use   name="CondFormats/RunInfo"/>
   <use   name="CondFormats/DataRecord"/>
-<use name="CalibTracker/SiPixelESProducers"/>
   <use   name="TrackingTools/TransientTrack"/>
   <use   name="TrackingTools/TrackFitters"/>
   <use   name="TrackingTools/TrajectoryState"/>
   <use   name="TrackingTools/TrackAssociator"/>
   <use   name="TrackingTools/KalmanUpdators"/>
-<use name="DataFormats/GeometrySurface"/>
-<use name="DataFormats/GeometryVector"/>
-<use name="TrackingTools/GeomPropagators"/>
-<use name="TrackingTools/PatternTools"/>
-<use name="TrackingTools/PatternTools"/>
   <use   name="DataFormats/TrajectorySeed"/>
   <use   name="SimTracker/TrackerHitAssociation"/>
   <use   name="Alignment/OfflineValidation"/>
   <use   name="PhysicsTools/UtilAlgos"/>
   <use   name="PhysicsTools/Utilities"/>
-<use name="PhysicsTools/PatAlgos"/>
   <use   name="FWCore/ServiceRegistry"/>
   <use   name="clhep"/>
   <use   name="boost"/>
   <use   name="root"/>
-<use name="rootmath"/>
-<use name="rootrflx"/>
-<use name="rootcore"/>
   <use   name="CommonTools/UtilAlgos"/>
   <use   name="RecoTracker/MeasurementDet"/>
   <use   name="TrackingTools/MeasurementDet"/>
   <use   name="FWCore/Utilities"/>
   <use   name="DataFormats/Luminosity"/>
   <use   name="DQM/SiPixelPhase1Common"/>
-<flags EDM_PLUGIN="1"/>
-
+  <use   name="RecoLocalTracker/SiPixelRecHits"/>
   <library   file="PhaseIPixelNtuplizer.cc ../src/*.cc" name="SiPixelToolsPhaseIPixelNtuplizerPlugin">
     <flags CXXFLAGS="-g -D=EDM_ML_DEBUG"/>
     <flags EDM_PLUGIN="1"/>
