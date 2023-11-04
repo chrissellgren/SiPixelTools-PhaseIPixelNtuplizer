@@ -340,7 +340,7 @@ public:
   float pix[1000][2];
 
   const std::string list =
-    "x/F:y:lx:ly:glx:gly:glz:sizeX/I:sizeY:i:edge:badpix:tworoc:size:charge:charge_corr/F";
+    "x/F:y:lx:ly:glx:gly:glz:sizeX/I:sizeY:i:edge:badpix:tworoc:size:charge/F:charge_corr/F";
 
   ClustData() { init(); }
 
