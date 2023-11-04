@@ -59,10 +59,26 @@
 
 #include "RecoLocalTracker/SiPixelRecHits/src/PixelCPEBase.cc"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEBase.h"
+
+// this might be the only two we need.
 #include "RecoLocalTracker/SiPixelRecHits/src/SiPixelTemplateReco.cc"
 //#include "RecoLocalTracker/SiPixelRecHits/src/SiPixelTemplateReco2D.cc"
 #include "CalibTracker/Records/interface/SiPixelTemplateDBObjectESProducerRcd.h"
 //#include "CalibTracker/Records/interface/SiPixel2DTemplateDBObjectESProducerRcd.h"
+
+// includes from TrackingRecHitProducer.cc that uses the same template object
+#include "FWCore/Framework/interface/stream/EDProducer.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "FWCore/Framework/interface/Run.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
+
+#include "CondFormats/SiPixelObjects/interface/SiPixelTemplateDBObject.h"
+#include "CondFormats/SiPixelTransient/interface/SiPixelTemplate.h"
 
 constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_TRIGGER_BIT;
 constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_BITMASK;
@@ -238,85 +254,85 @@ void PhaseIPixelNtuplizer::beginJob()
   }
   // Efficiency of the detector parts the trajectory measurements are located on
   trajROCEfficiencyTree_ -> Branch("trajROCEfficiency", &trajROCEff_, trajROCEff_.list.c_str());
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-  simhitOccupancy_fwd        = new TH2D("simhitOccupancy_fwd", "simhit occupancy - forward", 
-					150, -52.15, 52.15,  300,  -3.14159,  3.14159);
-  simhitOccupancy_l1         = new TH2D("simhitOccupancy_l1",  "simhit occupancy - layer 1", 
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  simhitOccupancy_l2         = new TH2D("simhitOccupancy_l2",  "simhit occupancy - layer 2", 
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  simhitOccupancy_l3         = new TH2D("simhitOccupancy_l3",  "simhit occupancy - layer 3", 
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  simhitOccupancy_l4         = new TH2D("simhitOccupancy_l4",  "simhit occupancy - layer 4", 
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  digiOccupancy_fwd          = new TH2D("digiOccupancy_fwd",   "digi occupancy - forward",   
-					150, -52.15, 52.15,  300,  -3.14159,  3.14159);
-  digiOccupancy_l1           = new TH2D("digiOccupancy_l1",    "digi occupancy - layer 1",   
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  digiOccupancy_l2           = new TH2D("digiOccupancy_l2",    "digi occupancy - layer 2",   
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  digiOccupancy_l3           = new TH2D("digiOccupancy_l3",    "digi occupancy - layer 3",   
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  digiOccupancy_l4           = new TH2D("digiOccupancy_l4",    "digi occupancy - layer 4",   
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  clustOccupancy_fwd         = new TH2D("clustOccupancy_fwd",  "cluster occupancy - forward",
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  clustOccupancy_l1          = new TH2D("clustOccupancy_l1",   "cluster occupancy - layer 1",
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  clustOccupancy_l2          = new TH2D("clustOccupancy_l2",   "cluster occupancy - layer 2",
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  clustOccupancy_l3          = new TH2D("clustOccupancy_l3",   "cluster occupancy - layer 3",
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  clustOccupancy_l4          = new TH2D("clustOccupancy_l4",   "cluster occupancy - layer 4",
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  rechitOccupancy_fwd        = new TH2D("rechitOccupancy_fwd", "rechit occupancy - forward", 
-					150, -52.15, 52.15,  300,  -3.14159,  3.14159);
-  rechitOccupancy_l1         = new TH2D("rechitOccupancy_l1",  "rechit occupancy - layer 1", 
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  rechitOccupancy_l2         = new TH2D("rechitOccupancy_l2",  "rechit occupancy - layer 2", 
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  rechitOccupancy_l3         = new TH2D("rechitOccupancy_l3",  "rechit occupancy - layer 3", 
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  rechitOccupancy_l4         = new TH2D("rechitOccupancy_l4",  "rechit occupancy - layer 4", 
-					150, -26.7,  26.7,   300,  -3.14159,  3.14159);
-  clustOccupancyROCBins_fwd  = new TH2D
-    ("clustOccupancyROCBins_fwd",  "cluster occupancy on ROCs - forward",
-     112,-3.5,3.5, 140,-17.5,17.5);
-  clustOccupancyROCBins_l1   = new TH2D
-    ("clustOccupancyROCBins_l1",   "cluster occupancy on ROCs - layer 1",
-     72, -4.5,4.5,  26, -6.5, 6.5);
-  clustOccupancyROCBins_l2   = new TH2D
-    ("clustOccupancyROCBins_l2",   "cluster occupancy on ROCs - layer 2",
-     72, -4.5,4.5,  58,-14.5,14.5);
-  clustOccupancyROCBins_l3   = new TH2D
-    ("clustOccupancyROCBins_l3",   "cluster occupancy on ROCs - layer 3",
-     72, -4.5,4.5,  90,-22.5,22.5);
-  clustOccupancyROCBins_l4   = new TH2D
-    ("clustOccupancyROCBins_l4",   "cluster occupancy on ROCs - layer 4",
-     72, -4.5,4.5, 130,-32.5,32.5);
-  rechitOccupancyROCBins_fwd = new TH2D
-    ("rechitOccupancyROCBins_fwd", "rechit occupancy on ROCS - forward",
-     112,-3.5,3.5, 140,-17.5,17.5);
-  rechitOccupancyROCBins_l1  = new TH2D
-    ("rechitOccupancyROCBins_l1",  "rechit occupancy on ROCS - layer 1",
-     72, -4.5,4.5,  26, -6.5, 6.5);
-  rechitOccupancyROCBins_l2  = new TH2D
-    ("rechitOccupancyROCBins_l2",  "rechit occupancy on ROCS - layer 2",
-     72, -4.5,4.5,  58,-14.5,14.5);
-  rechitOccupancyROCBins_l3  = new TH2D
-    ("rechitOccupancyROCBins_l3",  "rechit occupancy on ROCS - layer 3",
-     72, -4.5,4.5,  90,-22.5,22.5);
-  rechitOccupancyROCBins_l4  = new TH2D
-    ("rechitOccupancyROCBins_l4",  "rechit occupancy on ROCS - layer 4",
-     72, -4.5,4.5, 130,-32.5,32.5);
-  // FIXME
-  disk1PropagationEtaNumhits    = new TH1D("disk1PropagationEtaNumhits", 
-					   "disk1PropagationEtaNumhits",
-					   100, -3.1415, 3.1415);
-  disk1PropagationEtaEfficiency = new TH1D("disk1PropagationEtaEfficiency",
-					   "disk1PropagationEtaEfficiency",
-					   100, -3.1415, 3.1415);
-#endif
+  #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+    simhitOccupancy_fwd        = new TH2D("simhitOccupancy_fwd", "simhit occupancy - forward", 
+            150, -52.15, 52.15,  300,  -3.14159,  3.14159);
+    simhitOccupancy_l1         = new TH2D("simhitOccupancy_l1",  "simhit occupancy - layer 1", 
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    simhitOccupancy_l2         = new TH2D("simhitOccupancy_l2",  "simhit occupancy - layer 2", 
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    simhitOccupancy_l3         = new TH2D("simhitOccupancy_l3",  "simhit occupancy - layer 3", 
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    simhitOccupancy_l4         = new TH2D("simhitOccupancy_l4",  "simhit occupancy - layer 4", 
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    digiOccupancy_fwd          = new TH2D("digiOccupancy_fwd",   "digi occupancy - forward",   
+            150, -52.15, 52.15,  300,  -3.14159,  3.14159);
+    digiOccupancy_l1           = new TH2D("digiOccupancy_l1",    "digi occupancy - layer 1",   
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    digiOccupancy_l2           = new TH2D("digiOccupancy_l2",    "digi occupancy - layer 2",   
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    digiOccupancy_l3           = new TH2D("digiOccupancy_l3",    "digi occupancy - layer 3",   
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    digiOccupancy_l4           = new TH2D("digiOccupancy_l4",    "digi occupancy - layer 4",   
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    clustOccupancy_fwd         = new TH2D("clustOccupancy_fwd",  "cluster occupancy - forward",
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    clustOccupancy_l1          = new TH2D("clustOccupancy_l1",   "cluster occupancy - layer 1",
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    clustOccupancy_l2          = new TH2D("clustOccupancy_l2",   "cluster occupancy - layer 2",
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    clustOccupancy_l3          = new TH2D("clustOccupancy_l3",   "cluster occupancy - layer 3",
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    clustOccupancy_l4          = new TH2D("clustOccupancy_l4",   "cluster occupancy - layer 4",
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    rechitOccupancy_fwd        = new TH2D("rechitOccupancy_fwd", "rechit occupancy - forward", 
+            150, -52.15, 52.15,  300,  -3.14159,  3.14159);
+    rechitOccupancy_l1         = new TH2D("rechitOccupancy_l1",  "rechit occupancy - layer 1", 
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    rechitOccupancy_l2         = new TH2D("rechitOccupancy_l2",  "rechit occupancy - layer 2", 
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    rechitOccupancy_l3         = new TH2D("rechitOccupancy_l3",  "rechit occupancy - layer 3", 
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    rechitOccupancy_l4         = new TH2D("rechitOccupancy_l4",  "rechit occupancy - layer 4", 
+            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+    clustOccupancyROCBins_fwd  = new TH2D
+      ("clustOccupancyROCBins_fwd",  "cluster occupancy on ROCs - forward",
+      112,-3.5,3.5, 140,-17.5,17.5);
+    clustOccupancyROCBins_l1   = new TH2D
+      ("clustOccupancyROCBins_l1",   "cluster occupancy on ROCs - layer 1",
+      72, -4.5,4.5,  26, -6.5, 6.5);
+    clustOccupancyROCBins_l2   = new TH2D
+      ("clustOccupancyROCBins_l2",   "cluster occupancy on ROCs - layer 2",
+      72, -4.5,4.5,  58,-14.5,14.5);
+    clustOccupancyROCBins_l3   = new TH2D
+      ("clustOccupancyROCBins_l3",   "cluster occupancy on ROCs - layer 3",
+      72, -4.5,4.5,  90,-22.5,22.5);
+    clustOccupancyROCBins_l4   = new TH2D
+      ("clustOccupancyROCBins_l4",   "cluster occupancy on ROCs - layer 4",
+      72, -4.5,4.5, 130,-32.5,32.5);
+    rechitOccupancyROCBins_fwd = new TH2D
+      ("rechitOccupancyROCBins_fwd", "rechit occupancy on ROCS - forward",
+      112,-3.5,3.5, 140,-17.5,17.5);
+    rechitOccupancyROCBins_l1  = new TH2D
+      ("rechitOccupancyROCBins_l1",  "rechit occupancy on ROCS - layer 1",
+      72, -4.5,4.5,  26, -6.5, 6.5);
+    rechitOccupancyROCBins_l2  = new TH2D
+      ("rechitOccupancyROCBins_l2",  "rechit occupancy on ROCS - layer 2",
+      72, -4.5,4.5,  58,-14.5,14.5);
+    rechitOccupancyROCBins_l3  = new TH2D
+      ("rechitOccupancyROCBins_l3",  "rechit occupancy on ROCS - layer 3",
+      72, -4.5,4.5,  90,-22.5,22.5);
+    rechitOccupancyROCBins_l4  = new TH2D
+      ("rechitOccupancyROCBins_l4",  "rechit occupancy on ROCS - layer 4",
+      72, -4.5,4.5, 130,-32.5,32.5);
+    // FIXME
+    disk1PropagationEtaNumhits    = new TH1D("disk1PropagationEtaNumhits", 
+              "disk1PropagationEtaNumhits",
+              100, -3.1415, 3.1415);
+    disk1PropagationEtaEfficiency = new TH1D("disk1PropagationEtaEfficiency",
+              "disk1PropagationEtaEfficiency",
+              100, -3.1415, 3.1415);
+  #endif
 }
 
 void PhaseIPixelNtuplizer::endJob() 
@@ -327,69 +343,69 @@ void PhaseIPixelNtuplizer::endJob()
   std::cout << "Done generating ROC efficiency tree." << std::endl;
   std::cout << "OutputFileName in the Ntuplizer endjob: " << ntupleOutputFilename_ << "\"." << std::endl;
   ntupleOutputFile_ -> cd();
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-  constexpr int PHASE_SCENARIO = 1;
-  gStyle -> SetPalette(1);
-  gStyle -> SetNumberContours(999);
-  const std::vector<TH2D*> histogramsToSave = 
-    {
-      simhitOccupancy_fwd,        simhitOccupancy_l1,        
-      simhitOccupancy_l2,         simhitOccupancy_l3,        simhitOccupancy_l4,
-      digiOccupancy_fwd,          digiOccupancy_l1,          
-      digiOccupancy_l2,           digiOccupancy_l3,          digiOccupancy_l4,
-      clustOccupancy_fwd,         clustOccupancy_l1,         
-      clustOccupancy_l2,          clustOccupancy_l3,         clustOccupancy_l4, 
-      rechitOccupancy_fwd,        rechitOccupancy_l1,        
-      rechitOccupancy_l2,         rechitOccupancy_l3,        rechitOccupancy_l4,
-      clustOccupancyROCBins_fwd,  clustOccupancyROCBins_l1,  
-      clustOccupancyROCBins_l2,   clustOccupancyROCBins_l3,  clustOccupancyROCBins_l4,
-      rechitOccupancyROCBins_fwd, rechitOccupancyROCBins_l1, 
-      rechitOccupancyROCBins_l2,  rechitOccupancyROCBins_l3, rechitOccupancyROCBins_l4
-    };
-  for(auto histoIt = histogramsToSave.begin(); histoIt != histogramsToSave.end(); ++histoIt) {
-    TCanvas* canvas = custom_can_((*histoIt), std::string((*histoIt) -> GetTitle()) + "_canvas", 0, 0, 800, 800, 80, 140); 
-    canvas -> cd();
-    (*histoIt) -> Draw("COLZ");
-    std::string histoName = (*histoIt) -> GetName();
-    if(histoName.find("ROC") != std::string::npos) {
-      int layer = -1;
-      if(histoName.find("_fwd") != std::string::npos) layer = 0;
-      else {
-	const size_t labelPosition = histoName.find("_l");
-	if(labelPosition != std::string::npos) {
-	  if(histoName.size() <= labelPosition + 2) {
-	    std::cout << __PRETTY_FUNCTION__ <<": Error while processing the extra histogram names."
-		      << "Histogram name should contain layer info after _l: " 
-		      << histoName << std::endl;
-	    continue;
-	  }
-	  layer = histoName.at(labelPosition + 2) - '0';
-	}
+  #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+    constexpr int PHASE_SCENARIO = 1;
+    gStyle -> SetPalette(1);
+    gStyle -> SetNumberContours(999);
+    const std::vector<TH2D*> histogramsToSave = 
+      {
+        simhitOccupancy_fwd,        simhitOccupancy_l1,        
+        simhitOccupancy_l2,         simhitOccupancy_l3,        simhitOccupancy_l4,
+        digiOccupancy_fwd,          digiOccupancy_l1,          
+        digiOccupancy_l2,           digiOccupancy_l3,          digiOccupancy_l4,
+        clustOccupancy_fwd,         clustOccupancy_l1,         
+        clustOccupancy_l2,          clustOccupancy_l3,         clustOccupancy_l4, 
+        rechitOccupancy_fwd,        rechitOccupancy_l1,        
+        rechitOccupancy_l2,         rechitOccupancy_l3,        rechitOccupancy_l4,
+        clustOccupancyROCBins_fwd,  clustOccupancyROCBins_l1,  
+        clustOccupancyROCBins_l2,   clustOccupancyROCBins_l3,  clustOccupancyROCBins_l4,
+        rechitOccupancyROCBins_fwd, rechitOccupancyROCBins_l1, 
+        rechitOccupancyROCBins_l2,  rechitOccupancyROCBins_l3, rechitOccupancyROCBins_l4
+      };
+    for(auto histoIt = histogramsToSave.begin(); histoIt != histogramsToSave.end(); ++histoIt) {
+      TCanvas* canvas = custom_can_((*histoIt), std::string((*histoIt) -> GetTitle()) + "_canvas", 0, 0, 800, 800, 80, 140); 
+      canvas -> cd();
+      (*histoIt) -> Draw("COLZ");
+      std::string histoName = (*histoIt) -> GetName();
+      if(histoName.find("ROC") != std::string::npos) {
+        int layer = -1;
+        if(histoName.find("_fwd") != std::string::npos) layer = 0;
+        else {
+    const size_t labelPosition = histoName.find("_l");
+    if(labelPosition != std::string::npos) {
+      if(histoName.size() <= labelPosition + 2) {
+        std::cout << __PRETTY_FUNCTION__ <<": Error while processing the extra histogram names."
+            << "Histogram name should contain layer info after _l: " 
+            << histoName << std::endl;
+        continue;
       }
-      dress_occup_plot((*histoIt), layer, PHASE_SCENARIO);
+      layer = histoName.at(labelPosition + 2) - '0';
     }
-    // (*histoIt) -> SetDirectory(ntupleOutputFile_);
-    (*histoIt) -> Write();
-    canvas     -> Write();
-  }
-  // FIXME
-  const std::vector<TH1D*> disk1PropagationPlots =
-    {
-      disk1PropagationEtaNumhits,
-      disk1PropagationEtaEfficiency
-    };
-  for(auto histoIt = disk1PropagationPlots.begin();
-      histoIt != disk1PropagationPlots.end(); ++histoIt) {
-    TCanvas* canvas = custom_can_((*histoIt),
-				  std::string((*histoIt) -> GetTitle()) + "_canvas",
-				  0, 0, 800, 800, 80, 140); 
-    canvas -> cd();
-    (*histoIt) -> Draw("");
-    std::string histoName = (*histoIt) -> GetName();
-    (*histoIt) -> Write();
-    canvas     -> Write();
-  }
-#endif
+        }
+        dress_occup_plot((*histoIt), layer, PHASE_SCENARIO);
+      }
+      // (*histoIt) -> SetDirectory(ntupleOutputFile_);
+      (*histoIt) -> Write();
+      canvas     -> Write();
+    }
+    // FIXME
+    const std::vector<TH1D*> disk1PropagationPlots =
+      {
+        disk1PropagationEtaNumhits,
+        disk1PropagationEtaEfficiency
+      };
+    for(auto histoIt = disk1PropagationPlots.begin();
+        histoIt != disk1PropagationPlots.end(); ++histoIt) {
+      TCanvas* canvas = custom_can_((*histoIt),
+            std::string((*histoIt) -> GetTitle()) + "_canvas",
+            0, 0, 800, 800, 80, 140); 
+      canvas -> cd();
+      (*histoIt) -> Draw("");
+      std::string histoName = (*histoIt) -> GetName();
+      (*histoIt) -> Write();
+      canvas     -> Write();
+    }
+  #endif
   std::cout << "Writing plots to file: \"" << ntupleOutputFilename_ << "\"." << std::endl;
   ntupleOutputFile_ -> Write();
   std::cout << "Closing file: \"" << ntupleOutputFilename_ << "\"." << std::endl;
@@ -431,189 +447,214 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   // FED errors
   federrors_ = NtuplizerHelpers::getFedErrors(iEvent, rawDataErrorToken_);
 
-#if ADD_SIM_INFO > 0
-  // Simhits and hit associator
-  std::vector<edm::Handle<edm::PSimHitContainer>>
-    simhitCollectionHandles(simhitCollectionTokens_.size());
-  if (isEventFromMc_) {
-    for(unsigned int numToken = 0; numToken < simhitCollectionTokens_.size(); ++numToken) {
-      iEvent.getByToken(simhitCollectionTokens_[numToken], simhitCollectionHandles[numToken]);
+  // make the template object to draw the correction factor from
+  // need to define a token that will connect the record to the object
+  // token is like a bridge between the database object (record)
+  // maybe put this later in the code.
+
+  // Initialize 1D templates
+  const SiPixelTemplateDBObject* templateDBobject_;
+  // old
+  /*edm::ESHandle<SiPixelTemplateDBObject> templateDBobject;
+  iSetup.get<SiPixelTemplateDBObjectESProducerRcd>().get(templateDBobject); */
+
+  // create token (using grammar of PR)
+  const edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
+  // const auto templateDBobject = &iSetup.getData(templateDBobjectToken_); //how is this object used?
+  // 
+  //templateDBobject_ = templateDBobject.product();
+  std::vector< SiPixelTemplateStore > thePixelTemp_;
+  SiPixelTemplate templ(thePixelTemp_);
+
+  cout << " ---------  PixelCPETemplateReco: Loading templates from database (DB) --------- " << endl;
+  // the pushfile was causing a crash - remove temporarily.
+  /*if (!SiPixelTemplate::pushfile(*templateDBobject_, thePixelTemp_))
+      cout << "\nERROR: Templates not filled correctly. Check the sqlite file. Using SiPixelTemplateDBObject version "
+        << (*templateDBobject_).version() << "\n\n"; */
+
+  #if ADD_SIM_INFO > 0
+    // Simhits and hit associator
+    std::vector<edm::Handle<edm::PSimHitContainer>>
+      simhitCollectionHandles(simhitCollectionTokens_.size());
+    if (isEventFromMc_) {
+      for(unsigned int numToken = 0; numToken < simhitCollectionTokens_.size(); ++numToken) {
+        iEvent.getByToken(simhitCollectionTokens_[numToken], simhitCollectionHandles[numToken]);
+      }
+      //trackerHitAssociator_ = new TrackerHitAssociator(iEvent, trackerHitAssociatorConfig_);
+      pixelHitAssociator_   = new PixelHitAssociator(iEvent);
     }
-    //trackerHitAssociator_ = new TrackerHitAssociator(iEvent, trackerHitAssociatorConfig_);
-    pixelHitAssociator_   = new PixelHitAssociator(iEvent);
-  }
-#endif
-  
-  // Digis
-  edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
-  if (isEventFromMc_) {
-    if(saveDigiTree_ || npixFromDigiCollection_) iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
-  }
-
-  // SimTracks
-  edm::Handle<edm::SimTrackContainer> simTracksHandle;
-#if ADD_SIM_INFO > 0
-  if (isEventFromMc_) {
-    iEvent.getByToken(simTrackToken_, simTracksHandle);
-  }
-#endif
-  
-  // Get vertices
-  edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
-  iEvent.getByToken(primaryVerticesToken_, vertexCollectionHandle);
-
-  // Get trigger info
-  edm::Handle<edm::TriggerResults> triggerResultsHandle;
-  iEvent.getByToken(triggerResultsToken_, triggerResultsHandle);
-
-  // Get pileup info
-  edm::Handle<std::vector<PileupSummaryInfo>> puInfoCollectionHandle;
-  iEvent.getByToken(pileupSummaryToken_,      puInfoCollectionHandle);
-
-  // Get cluster collection
-  edm::Handle<edmNew::DetSetVector<SiPixelCluster>> clusterCollectionHandle;
-  iEvent.getByToken(clustersToken_,                 clusterCollectionHandle);
-
-  // Get Traj-Track Collection
-  edm::Handle<TrajTrackAssociationCollection>  trajTrackCollectionHandle;
-  iEvent.getByToken(trajTrackCollectionToken_, trajTrackCollectionHandle);
-
-  // muons
-  edm::Handle<reco::MuonCollection> muonCollectionHandle;
-  iEvent.getByToken(muonCollectionToken_, muonCollectionHandle);
-
-  // track builder for IPTools methods
-  edm::ESHandle<TransientTrackBuilder> trackBuilderHandle;
-#if CMSSW_VERSION >= 123
-  trackBuilderHandle = iSetup.getHandle(trackBuilderToken_); 
-#else
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilderHandle); 
-#endif
-
-  // TrackerTopology for module informations
-  edm::ESHandle<TrackerTopology> trackerTopologyHandle;
-#if CMSSW_VERSION >= 123
-  trackerTopologyHandle = iSetup.getHandle(trackerTopologyToken_);
-#else
-  iSetup.get<TrackerTopologyRcd>().get(trackerTopologyHandle);
-#endif
-  trackerTopology_ = trackerTopologyHandle.product();
-
-  // TrackerGeometry for module informations
-  edm::ESHandle<TrackerGeometry> trackerGeometryHandle;
-#if CMSSW_VERSION >= 123
-  trackerGeometryHandle = iSetup.getHandle(trackerGeometryToken_);
-#else
-  iSetup.get<TrackerDigiGeometryRecord>().get(trackerGeometryHandle);
-#endif
-  trackerGeometry_ = trackerGeometryHandle.product();
-
-  // Tracker propagator for propagating tracks to other layers
-  edm::ESHandle<Propagator> propagatorHandle;
-#if CMSSW_VERSION >= 123
-  propagatorHandle = iSetup.getHandle(propagatorToken_);
-#else
-  iSetup.get<TrackingComponentsRecord>().get("PropagatorWithMaterial", propagatorHandle);  
-#endif
-  std::unique_ptr<Propagator> propagatorUniquePtr(propagatorHandle.product() -> clone());
-  trackerPropagator_ = propagatorUniquePtr.get();
-  const_cast<Propagator*>(trackerPropagator_) -> setPropagationDirection(oppositeToMomentum);
-
-  // Measurement Tracker Handle
-  edm::ESHandle<MeasurementTracker> measurementTrackerHandle;
-#if CMSSW_VERSION >= 123
-  measurementTrackerHandle = iSetup.getHandle(measurementTrackerToken_);
-#else
-  iSetup.get<CkfComponentsRecord>().get(measurementTrackerHandle);
-#endif
-  measurementTracker_ = measurementTrackerHandle.product();
-
-  // Measurement Tracker event
-  edm::Handle<MeasurementTrackerEvent> measurementTrackerEventHandle;
-  iEvent.getByToken(measurementTrackerEventToken_, measurementTrackerEventHandle);
-  measurementTrackerEvent_ = measurementTrackerEventHandle.product();
-
-  // Measurement estimator
-  edm::ESHandle<Chi2MeasurementEstimatorBase> chi2MeasurementEstimatorHandle;
-#if CMSSW_VERSION >= 123
-  chi2MeasurementEstimatorHandle = iSetup.getHandle(chi2MeasurementEstimatorToken_);
-#else
-  iSetup.get<TrackingComponentsRecord>().get("Chi2", chi2MeasurementEstimatorHandle);
-#endif
-  chi2MeasurementEstimator_ = chi2MeasurementEstimatorHandle.product();
-
-  // Pixel Parameter estimator
-  edm::ESHandle<PixelClusterParameterEstimator> pixelClusterParameterEstimatorHandle;
-#if CMSSW_VERSION >= 123
-  pixelClusterParameterEstimatorHandle = iSetup.getHandle(pixelClusterParameterEstimatorToken_);
-#else
-  iSetup.get<TkPixelCPERecord>().get("PixelCPEGeneric", pixelClusterParameterEstimatorHandle); 
-#endif
-  pixelClusterParameterEstimator_ = pixelClusterParameterEstimatorHandle.product();
-
-  // Track distance to muons
-  if (isALCARECO_) {
-    // get the muon track collection
-    iEvent.getByToken(muonTracksToken_, muonTrackCollectionHandle_);
+  #endif
     
-    // get the track distances
-    iEvent.getByToken(distanceToken_, distancesToTrack_);    
-  }
+    // Digis
+    edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
+    if (isEventFromMc_) {
+      if(saveDigiTree_ || npixFromDigiCollection_) iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
+    }
 
-#if CMSSW_VERSION > 110
-  // Get CablingMap (used for ROC number)
-  edm::ESHandle<SiPixelFedCablingMap> cablingMapHandle;
-# if CMSSW_VERSION >= 123
-  cablingMapHandle = iSetup.getHandle(cablingMapToken_);
-# else
-  iSetup.get<SiPixelFedCablingMapRcd>().get(cablingMapHandle);
-# endif
+    // SimTracks
+    edm::Handle<edm::SimTrackContainer> simTracksHandle;
+  #if ADD_SIM_INFO > 0
+    if (isEventFromMc_) {
+      iEvent.getByToken(simTrackToken_, simTracksHandle);
+    }
+  #endif
+    
+    // Get vertices
+    edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
+    iEvent.getByToken(primaryVerticesToken_, vertexCollectionHandle);
 
-  // Initialize the object used to calculate module geometric informations
-  coord_.init(trackerTopology_, trackerGeometry_, cablingMapHandle.product());
-#else
-  coord_.init(iSetup);
-#endif
-  //std::cout << "Event summary informations: " << std::endl;
-  //std::cout << "Vertices: " << (vertexCollectionHandle.isValid() ? std::to_string(vertexCollectionHandle -> size()) : "invalid") << " ";
-  //if(saveDigiTree_) std::cout << "Digis: " << (digiCollectionHandle.isValid()) 
-  //      		      << (digiCollectionHandle.isValid() ? 
-  //      			  std::to_string(digiCollectionHandle -> size()) : "invalid")
-  //      		      << " ";
-  //
-  //std::cout << "Clusters: " << (clusterCollectionHandle.isValid() ?
-  //      			std::to_string(clusterCollectionHandle -> size()) : "invalid")
-  //          << " ";
-  //std::cout << "Tracks: " << (trajTrackCollectionHandle.isValid() ?
-  //      		      std::to_string(trajTrackCollectionHandle -> size()) : "invalid")
-  //          << " ";
-  getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle,
-	     puInfoCollectionHandle, digiCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
-  if(saveDigiTree_ && digiCollectionHandle.isValid()) {
-    //std::cout << "Saving digis and creating digi plots..." << std::endl;
-    getDigiData(digiCollectionHandle);
-  }
+    // Get trigger info
+    edm::Handle<edm::TriggerResults> triggerResultsHandle;
+    iEvent.getByToken(triggerResultsToken_, triggerResultsHandle);
 
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-  int areAllSimhitHandlesValid = 
-    std::all_of(simhitCollectionHandles.begin(),
-		simhitCollectionHandles.end(),
-		[] (const edm::Handle<std::vector<PSimHit>>& handle) { return handle.isValid(); });
-  if(areAllSimhitHandlesValid) {
-    //std::cout << "Saving simhit plots..." << std::endl;
-    getSimhitData(simhitCollectionHandles);
-  } else {
-    static int timesReported = 0;
-    if(timesReported < 10) 
-      std::cout << "Error in: " << __PRETTY_FUNCTION__
-		<< ": One or more of the handles are invalid or missing! Skipping event." \
-	" (Check the input products!)" << std::endl;
-    if(++timesReported == 10) 
-      std::cout << "Invalid handles were reported more than 10 times." \
-	" Omitting further reports!" << std::endl;
-    return;
-  }
-#endif
+    // Get pileup info
+    edm::Handle<std::vector<PileupSummaryInfo>> puInfoCollectionHandle;
+    iEvent.getByToken(pileupSummaryToken_,      puInfoCollectionHandle);
+
+    // Get cluster collection
+    edm::Handle<edmNew::DetSetVector<SiPixelCluster>> clusterCollectionHandle;
+    iEvent.getByToken(clustersToken_,                 clusterCollectionHandle);
+
+    // Get Traj-Track Collection
+    edm::Handle<TrajTrackAssociationCollection>  trajTrackCollectionHandle;
+    iEvent.getByToken(trajTrackCollectionToken_, trajTrackCollectionHandle);
+
+    // muons
+    edm::Handle<reco::MuonCollection> muonCollectionHandle;
+    iEvent.getByToken(muonCollectionToken_, muonCollectionHandle);
+
+    // track builder for IPTools methods
+    edm::ESHandle<TransientTrackBuilder> trackBuilderHandle;
+  #if CMSSW_VERSION >= 123
+    trackBuilderHandle = iSetup.getHandle(trackBuilderToken_); 
+  #else
+    iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilderHandle); 
+  #endif
+
+    // TrackerTopology for module informations
+    edm::ESHandle<TrackerTopology> trackerTopologyHandle;
+  #if CMSSW_VERSION >= 123
+    trackerTopologyHandle = iSetup.getHandle(trackerTopologyToken_);
+  #else
+    iSetup.get<TrackerTopologyRcd>().get(trackerTopologyHandle);
+  #endif
+    trackerTopology_ = trackerTopologyHandle.product();
+
+    // TrackerGeometry for module informations
+    edm::ESHandle<TrackerGeometry> trackerGeometryHandle;
+  #if CMSSW_VERSION >= 123
+    trackerGeometryHandle = iSetup.getHandle(trackerGeometryToken_);
+  #else
+    iSetup.get<TrackerDigiGeometryRecord>().get(trackerGeometryHandle);
+  #endif
+    trackerGeometry_ = trackerGeometryHandle.product();
+
+    // Tracker propagator for propagating tracks to other layers
+    edm::ESHandle<Propagator> propagatorHandle;
+  #if CMSSW_VERSION >= 123
+    propagatorHandle = iSetup.getHandle(propagatorToken_);
+  #else
+    iSetup.get<TrackingComponentsRecord>().get("PropagatorWithMaterial", propagatorHandle);  
+  #endif
+    std::unique_ptr<Propagator> propagatorUniquePtr(propagatorHandle.product() -> clone());
+    trackerPropagator_ = propagatorUniquePtr.get();
+    const_cast<Propagator*>(trackerPropagator_) -> setPropagationDirection(oppositeToMomentum);
+
+    // Measurement Tracker Handle
+    edm::ESHandle<MeasurementTracker> measurementTrackerHandle;
+  #if CMSSW_VERSION >= 123
+    measurementTrackerHandle = iSetup.getHandle(measurementTrackerToken_);
+  #else
+    iSetup.get<CkfComponentsRecord>().get(measurementTrackerHandle);
+  #endif
+    measurementTracker_ = measurementTrackerHandle.product();
+
+    // Measurement Tracker event
+    edm::Handle<MeasurementTrackerEvent> measurementTrackerEventHandle;
+    iEvent.getByToken(measurementTrackerEventToken_, measurementTrackerEventHandle);
+    measurementTrackerEvent_ = measurementTrackerEventHandle.product();
+
+    // Measurement estimator
+    edm::ESHandle<Chi2MeasurementEstimatorBase> chi2MeasurementEstimatorHandle;
+  #if CMSSW_VERSION >= 123
+    chi2MeasurementEstimatorHandle = iSetup.getHandle(chi2MeasurementEstimatorToken_);
+  #else
+    iSetup.get<TrackingComponentsRecord>().get("Chi2", chi2MeasurementEstimatorHandle);
+  #endif
+    chi2MeasurementEstimator_ = chi2MeasurementEstimatorHandle.product();
+
+    // Pixel Parameter estimator
+    edm::ESHandle<PixelClusterParameterEstimator> pixelClusterParameterEstimatorHandle;
+  #if CMSSW_VERSION >= 123
+    pixelClusterParameterEstimatorHandle = iSetup.getHandle(pixelClusterParameterEstimatorToken_);
+  #else
+    iSetup.get<TkPixelCPERecord>().get("PixelCPEGeneric", pixelClusterParameterEstimatorHandle); 
+  #endif
+    pixelClusterParameterEstimator_ = pixelClusterParameterEstimatorHandle.product();
+
+    // Track distance to muons
+    if (isALCARECO_) {
+      // get the muon track collection
+      iEvent.getByToken(muonTracksToken_, muonTrackCollectionHandle_);
+      
+      // get the track distances
+      iEvent.getByToken(distanceToken_, distancesToTrack_);    
+    }
+
+  #if CMSSW_VERSION > 110
+    // Get CablingMap (used for ROC number)
+    edm::ESHandle<SiPixelFedCablingMap> cablingMapHandle;
+  # if CMSSW_VERSION >= 123
+    cablingMapHandle = iSetup.getHandle(cablingMapToken_);
+  # else
+    iSetup.get<SiPixelFedCablingMapRcd>().get(cablingMapHandle);
+  # endif
+
+    // Initialize the object used to calculate module geometric informations
+    coord_.init(trackerTopology_, trackerGeometry_, cablingMapHandle.product());
+  #else
+    coord_.init(iSetup);
+  #endif
+    //std::cout << "Event summary informations: " << std::endl;
+    //std::cout << "Vertices: " << (vertexCollectionHandle.isValid() ? std::to_string(vertexCollectionHandle -> size()) : "invalid") << " ";
+    //if(saveDigiTree_) std::cout << "Digis: " << (digiCollectionHandle.isValid()) 
+    //      		      << (digiCollectionHandle.isValid() ? 
+    //      			  std::to_string(digiCollectionHandle -> size()) : "invalid")
+    //      		      << " ";
+    //
+    //std::cout << "Clusters: " << (clusterCollectionHandle.isValid() ?
+    //      			std::to_string(clusterCollectionHandle -> size()) : "invalid")
+    //          << " ";
+    //std::cout << "Tracks: " << (trajTrackCollectionHandle.isValid() ?
+    //      		      std::to_string(trajTrackCollectionHandle -> size()) : "invalid")
+    //          << " ";
+    getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle,
+        puInfoCollectionHandle, digiCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
+    if(saveDigiTree_ && digiCollectionHandle.isValid()) {
+      //std::cout << "Saving digis and creating digi plots..." << std::endl;
+      getDigiData(digiCollectionHandle);
+    }
+
+  #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+    int areAllSimhitHandlesValid = 
+      std::all_of(simhitCollectionHandles.begin(),
+      simhitCollectionHandles.end(),
+      [] (const edm::Handle<std::vector<PSimHit>>& handle) { return handle.isValid(); });
+    if(areAllSimhitHandlesValid) {
+      //std::cout << "Saving simhit plots..." << std::endl;
+      getSimhitData(simhitCollectionHandles);
+    } else {
+      static int timesReported = 0;
+      if(timesReported < 10) 
+        std::cout << "Error in: " << __PRETTY_FUNCTION__
+      << ": One or more of the handles are invalid or missing! Skipping event." \
+    " (Check the input products!)" << std::endl;
+      if(++timesReported == 10) 
+        std::cout << "Invalid handles were reported more than 10 times." \
+    " Omitting further reports!" << std::endl;
+      return;
+    }
+  #endif
 
   //std::cout << "Saving clusters..." << std::endl;
   getClustData(clusterCollectionHandle);
@@ -628,12 +669,12 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   }
   //std::cout << "The Phase1Ntuplizer data processing has been finished." << std::endl;
 
-#if ADD_SIM_INFO > 0
-  if (isEventFromMc_) {
-    //delete trackerHitAssociator_;
-    delete pixelHitAssociator_;
-  }
-#endif
+  #if ADD_SIM_INFO > 0
+    if (isEventFromMc_) {
+      //delete trackerHitAssociator_;
+      delete pixelHitAssociator_;
+    }
+  #endif
 }
 
 void PhaseIPixelNtuplizer::setTriggerTable() {
@@ -778,28 +819,6 @@ void PhaseIPixelNtuplizer::getEvtData
     }
   }
 
-    // make the template object to draw the correction factor
-    // need to define a token that will connect the record to the object
-    // token is like a bridge bw the database object(record)
-
-  // Initialize 1D templates
-  //const SiPixelTemplateDBObject* templateDBobject_;
-  /*edm::ESHandle<SiPixelTemplateDBObject> templateDBobject;
-  iSetup.get<SiPixelTemplateDBObjectESProducerRcd>().get(templateDBobject); */
-  // from PR token
-  /*const edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
-  const auto templateDBobject = &iSetup.getData(templateDBobjectToken_);
-  // 
-  //templateDBobject_ = templateDBobject.product();
-  std::vector< SiPixelTemplateStore > thePixelTemp_;
-  SiPixelTemplate templ(thePixelTemp_);
-
-  cout << " ---------  PixelCPETemplateReco: Loading templates from database (DB) --------- " << endl;
-
-  if (!SiPixelTemplate::pushfile(*templateDBobject_, thePixelTemp_))
-      cout << "\nERROR: Templates not filled correctly. Check the sqlite file. Using SiPixelTemplateDBObject version "
-        << (*templateDBobject_).version() << "\n\n"; */
-
   // Fill the tree
   eventTree_ -> Fill();
 
@@ -927,45 +946,45 @@ void PhaseIPixelNtuplizer::getDigiData
 
     DetId detId(digiDetSet.detId());
 
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-    unsigned int subdetId = detId.subdetId();
-    const GeomDetUnit* geomDetUnit      = trackerGeometry_ -> idToDetUnit(detId);
-#endif
+  #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+      unsigned int subdetId = detId.subdetId();
+      const GeomDetUnit* geomDetUnit      = trackerGeometry_ -> idToDetUnit(detId);
+  #endif
 
-    for(const auto& digi: digiDetSet)	{
-      digi_.init();
-      digi_.i   = digiIndexInEvent++;
-      digi_.row = digi.row();
-      digi_.col = digi.column();
-      digi_.adc = digi.adc();
-      
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-      LocalPoint digiLocalCoordinates(digi_.row, digi_.col, 0);
-      GlobalPoint digiGlobalCoordinates = geomDetUnit -> toGlobal(digiLocalCoordinates);
-      
-      if(subdetId == PixelSubdetector::PixelBarrel) {
-	int layer = trackerTopology_ -> pxbLayer(detId);
+      for(const auto& digi: digiDetSet)	{
+        digi_.init();
+        digi_.i   = digiIndexInEvent++;
+        digi_.row = digi.row();
+        digi_.col = digi.column();
+        digi_.adc = digi.adc();
+        
+  #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+        LocalPoint digiLocalCoordinates(digi_.row, digi_.col, 0);
+        GlobalPoint digiGlobalCoordinates = geomDetUnit -> toGlobal(digiLocalCoordinates);
+        
+        if(subdetId == PixelSubdetector::PixelBarrel) {
+    int layer = trackerTopology_ -> pxbLayer(detId);
 
-	if(layer == 1) digiOccupancy_l1 -> Fill(digiGlobalCoordinates.z(),
-						atan2( digiGlobalCoordinates.y(),
-						       digiGlobalCoordinates.x()));
+    if(layer == 1) digiOccupancy_l1 -> Fill(digiGlobalCoordinates.z(),
+              atan2( digiGlobalCoordinates.y(),
+                    digiGlobalCoordinates.x()));
 
-	if(layer == 2) digiOccupancy_l2 -> Fill(digiGlobalCoordinates.z(),
-						atan2( digiGlobalCoordinates.y(),
-						       digiGlobalCoordinates.x()));
+    if(layer == 2) digiOccupancy_l2 -> Fill(digiGlobalCoordinates.z(),
+              atan2( digiGlobalCoordinates.y(),
+                    digiGlobalCoordinates.x()));
 
-	if(layer == 3) digiOccupancy_l3 -> Fill(digiGlobalCoordinates.z(),
-						atan2( digiGlobalCoordinates.y(),
-						       digiGlobalCoordinates.x()));
+    if(layer == 3) digiOccupancy_l3 -> Fill(digiGlobalCoordinates.z(),
+              atan2( digiGlobalCoordinates.y(),
+                    digiGlobalCoordinates.x()));
 
-	if(layer == 4) digiOccupancy_l4 -> Fill(digiGlobalCoordinates.z(),
-						atan2( digiGlobalCoordinates.y(),
-						       digiGlobalCoordinates.x()));
+    if(layer == 4) digiOccupancy_l4 -> Fill(digiGlobalCoordinates.z(),
+              atan2( digiGlobalCoordinates.y(),
+                    digiGlobalCoordinates.x()));
 
-      } else if(subdetId == PixelSubdetector::PixelEndcap) {
-	digiOccupancy_fwd -> Fill(digiGlobalCoordinates.z(), atan2(digiGlobalCoordinates.y(), digiGlobalCoordinates.x()));
-      }
-#endif
+        } else if(subdetId == PixelSubdetector::PixelEndcap) {
+    digiOccupancy_fwd -> Fill(digiGlobalCoordinates.z(), atan2(digiGlobalCoordinates.y(), digiGlobalCoordinates.x()));
+        }
+  #endif
 
       digiTree_ -> Fill();
     }
@@ -983,57 +1002,6 @@ void PhaseIPixelNtuplizer::getClustData
     handleDefaultError("data_access", "data_access", "Failed to fetch the clusters.");
 
   const edmNew::DetSetVector<SiPixelCluster>& currentClusterCollection = *clusterCollectionHandle;
-
-/*
-
-  static float qscale, qscaleB, qscaleF;
-  qscaleB=1., qscaleF=1.;
-  printf("bpix scale factor = %f, fpix scale factor = %f \n", qscaleB, qscaleF);
-
-  bpix = true;
-        if(ana->ClDisk[iCl] < -10) {
-          qscale = qscaleB;
-          layer = ana->ClLayer[iCl];
-          }
-
-        else {
-          bpix = false;
-          qscale = qscaleF; } */
-    
-  // template analysis
-  /* 1D templat analysis
-          SiPixelTemplateReco::ClusMatrix clusterPayload{&cluster[0][0], xdouble, ydouble, mrow,mcol};
-          locBx = 1.;
-          if(cotbeta < 0.) locBx = -1.;
-          locBz = locBx;
-          if(cotalpha < 0.) locBz = -locBx;
-          
-          int TemplID1 = -9999;
-          TemplID1 = templateDBobject_->getTemplateID(ana->ClDetId[iCl]);
-          templ.interpolate(TemplID1, 0.f, 0.f, 1.f, 1.f); */
-
-
-// need to find the name of all of these variables
-// look around for the cluster information
-// if not, we can calculate it ourselves (z/x)
-// defined in HSCP
-          // Running the actualy 1D Template Reco
-          /*ierr = PixelTempReco1D(TemplID1,
-                                 cotalpha, 
-                                 cotbeta, 
-                                 locBz, 
-                                 locBx, 
-                                 clusterPayload, 
-                                 templ, 
-                                 yrec, 
-                                 sigmay, 
-                                 proby, 
-                                 xrec, 
-                                 sigmax, 
-                                 probx, 
-                                 qbin, 
-                                 speed, 
-                                 probQ);   */
 
   // Looping on clusters with the same location
   using clustCollIt_t = edmNew::DetSetVector<SiPixelCluster>::const_iterator;
@@ -1090,11 +1058,91 @@ void PhaseIPixelNtuplizer::getClustData
 
       // Charge
       clu_.charge = currentCluster.charge();
-      // corrected charge
+      // Corrected charge
+      // load template object again here. 
+      std::vector< SiPixelTemplateStore > thePixelTemp_;
+      SiPixelTemplate templ(thePixelTemp_);
+
+      // need to find the name of all of these variables
+      // look around for the cluster information
+      // if not, we can calculate it ourselves (z/x)
+      // defined in HSCP
+
+      // unclear if these are needed.
+      /*static float qscale, qscaleB, qscaleF;
+      qscaleB=1., qscaleF=1.;
+      printf("bpix scale factor = %f, fpix scale factor = %f \n", qscaleB, qscaleF);
+
+      bpix = true;
+            if(ana->ClDisk[iCl] < -10) {
+              qscale = qscaleB;
+              layer = ana->ClLayer[iCl];
+              }
+
+            else {
+              bpix = false;
+              qscale = qscaleF; } */
+        
+      // template analysis
+
+      // Local variables (from hscp)
+      bool ydouble[TYSIZE], xdouble[TXSIZE];
+      static float qscale, qscaleB, qscaleF, pcut, tkpcut, probQ, /*xs, ys,*/ probQonTrack, probQonTrackTerm, probXYonTrack, probXYonTrackTerm, dEdxEstimator;
+      static float probQonTrackWMulti, probXYonTrackWMulti, corrFactor;
+      static float xhit, yhit, xrec, yrec, sigmax, sigmay, probx, proby, cotalpha, cotbeta, locBx, locBz, xoff, yoff, xtemp, ytemp;  
+      static int /*sfile, nrun, external,*/ size, sizex, sizey, layer, llayer, /*module, ladder, offladder, side,*/ disk, /*blade, onblade,*/ panel, lowpt;
+    //   static int tladp1[4], qlad[4]={3, 7, 11, 16};
+      static int lumiMin = 100000, lumiMax = 0;
+      static vector<int> nbin(5,0);
+      int i, j, ierr, ierr2, qbin;
+      bool bpix;
+      // more defs from hscp
+      double log10probXY, log10probQ, log10probXYQ, logprobQonTrackWMulti, logprobXYonTrackWMulti, qclust, qnorm, qnormcorr, proba, probXY, probXYQ, dx, dy, TkP, xhmod, yhmod;
+      static int iy, ix, ngood, nbad, speed, /*IDF1,*/ ring;
+        // Other inits
+      xpitch = 100;
+      ypitch = 150;
+      speed = -2;
+      ngood = 0; nbad = 0;
+
+      // 1D templat analysis
+      SiPixelTemplateReco::ClusMatrix clusterPayload{&cluster[0][0], xdouble, ydouble, mrow,mcol};
+      locBx = 1.;
+      if(cotbeta < 0.) locBx = -1.;
+      locBz = locBx;
+      if(cotalpha < 0.) locBz = -locBx;
+      
+      int TemplID1 = -9999;
+      TemplID1 = templateDBobject_->getTemplateID(ana->ClDetId[iCl]); // this will need fix
+      templ.interpolate(TemplID1, 0.f, 0.f, 1.f, 1.f);
+
+      // Running the actualy 1D Template Reco
+      ierr = PixelTempReco1D(TemplID1, // defined above
+                              cotalpha, // FIX
+                              cotbeta,  // FIX
+                              locBz,    // defined above
+                              locBx,    // defined above
+                              clusterPayload, // defined above 
+                              templ,   // da
+                              yrec,  // FIX
+                              sigmay,  // FIX
+                              proby,  // FIX
+                              xrec,  // FIX
+                              sigmax,  // FIX
+                              probx, // FIX
+                              qbin,  // FIX
+                              speed, // FIX
+                              probQ); // FIX 
+      cout << "Template reco success/failiure: " < ierr < "\n"
+
       // corrFactor = (templ.qscale())/templ.r_qMeas_qTrue();
       //clu_.charge_corr = currentCluster.charge * corrFactor;
       //templ.qscale()
-      clu_.charge_corr = 1;
+      // check: normalized charge ?
+      qnorm = qclust/sqrt((double)(1.+cotbeta*cotbeta+cotalpha*cotalpha));
+      if(qnorm < 10000.) continue;
+
+      clu_.charge_corr = templ.qscale();
 
       // Misc.
       for(int i = 0; i < clu_.size && i < 1000; ++i) {
