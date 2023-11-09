@@ -158,6 +158,8 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
     (iConfig.getParameter<edm::InputTag>("trajectoryInput"));
   measurementTrackerEventToken_ = consumes<MeasurementTrackerEvent>
     (edm::InputTag("MeasurementTrackerEvent"));
+  
+  templateDBobjectToken_ = esConsumes<edm::Transition::Event>();
 
   // Save digi tree only if saveDigiTree_ option is set
 #if ADD_SIM_INFO >0
@@ -464,7 +466,7 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   iSetup.get<SiPixelTemplateDBObjectESProducerRcd>().get(templateDBobject); */
 
   // create token (using grammar of PR)
-  const edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
+  //const edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
   templateDBobject_ = &iSetup.getData(templateDBobjectToken_); 
   // 
   //templateDBobject_ = templateDBobject.product();
@@ -1073,7 +1075,7 @@ void PhaseIPixelNtuplizer::getClustData
       // if not, we can calculate it ourselves (z/x)
       // defined in HSCP
         
-      // template analysis
+      // template analysis // 
 
       // Local variables (from hscp)
       bool ydouble[TYSIZE], xdouble[TXSIZE];

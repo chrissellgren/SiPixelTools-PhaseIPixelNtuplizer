@@ -273,6 +273,8 @@ private:
   edm::EDGetTokenT<edm::ConditionsInRunBlock>               conditionsInRunBlockToken_;
   edm::EDGetTokenT<edm::ValueMap<std::vector<float>>>       distanceToken_;
   edm::EDGetTokenT<edm::View<reco::Track>>                  muonTracksToken_;
+  
+  edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
 
   // Handles
   edm::Handle<edm::View<reco::Track>> muonTrackCollectionHandle_;
