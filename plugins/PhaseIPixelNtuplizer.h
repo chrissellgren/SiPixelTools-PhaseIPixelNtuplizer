@@ -121,6 +121,34 @@
 #include <vector>
 #include <map>
 
+// includes for the q correction
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+
+#include "RecoLocalTracker/SiPixelRecHits/src/PixelCPEBase.cc"
+#include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEBase.h"
+
+// this might be the only two we need.
+#include "RecoLocalTracker/SiPixelRecHits/src/SiPixelTemplateReco.cc"
+//#include "RecoLocalTracker/SiPixelRecHits/src/SiPixelTemplateReco2D.cc"
+#include "CalibTracker/Records/interface/SiPixelTemplateDBObjectESProducerRcd.h"
+//#include "CalibTracker/Records/interface/SiPixel2DTemplateDBObjectESProducerRcd.h"
+
+// includes from TrackingRecHitProducer.cc that uses the same template object
+#include "FWCore/Framework/interface/stream/EDProducer.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "FWCore/Framework/interface/Run.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
+
+#include "CondFormats/SiPixelObjects/interface/SiPixelTemplateDBObject.h"
+#include "CondFormats/SiPixelTransient/interface/SiPixelTemplate.h"
+
+
 // Compiler directives
 #define EDM_ML_LOGDEBUG
 #define ML_DEBUG
@@ -158,6 +186,7 @@ public:
   virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+  const SiPixelTemplateDBObject* templateDBobject_;
 
 private:
   edm::ParameterSet iConfig_;

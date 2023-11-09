@@ -53,6 +53,7 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h" */
 
+/*
 // includes for the q correction
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -78,7 +79,7 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 
 #include "CondFormats/SiPixelObjects/interface/SiPixelTemplateDBObject.h"
-#include "CondFormats/SiPixelTransient/interface/SiPixelTemplate.h"
+#include "CondFormats/SiPixelTransient/interface/SiPixelTemplate.h" */
 
 constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_TRIGGER_BIT;
 constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_BITMASK;
@@ -127,6 +128,10 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
   cablingMapToken_(esConsumes())
 #endif
 {
+
+  // define the token and template object here - cannot use auto here: getData - this is global variables
+  //const edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
+  //const SiPixelTemplateDBObject* templateDBobject_;
 
   if(isCosmicTracking_) 
     std::cout << "Running with cosmics setting turned on." << std::endl;
@@ -453,18 +458,18 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   // maybe put this later in the code.
 
   // Initialize 1D templates
-  const SiPixelTemplateDBObject* templateDBobject_;
+  //const SiPixelTemplateDBObject* templateDBobject_;
   // old
   /*edm::ESHandle<SiPixelTemplateDBObject> templateDBobject;
   iSetup.get<SiPixelTemplateDBObjectESProducerRcd>().get(templateDBobject); */
 
   // create token (using grammar of PR)
   const edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
-  // const auto templateDBobject = &iSetup.getData(templateDBobjectToken_); //how is this object used?
+  templateDBobject_ = &iSetup.getData(templateDBobjectToken_); 
   // 
   //templateDBobject_ = templateDBobject.product();
-  std::vector< SiPixelTemplateStore > thePixelTemp_;
-  SiPixelTemplate templ(thePixelTemp_);
+  //std::vector< SiPixelTemplateStore > thePixelTemp_;
+  //SiPixelTemplate templ(thePixelTemp_);
 
   cout << " ---------  PixelCPETemplateReco: Loading templates from database (DB) --------- " << endl;
   // the pushfile was causing a crash - remove temporarily.
@@ -1060,89 +1065,100 @@ void PhaseIPixelNtuplizer::getClustData
       clu_.charge = currentCluster.charge();
       // Corrected charge
       // load template object again here. 
-      std::vector< SiPixelTemplateStore > thePixelTemp_;
-      SiPixelTemplate templ(thePixelTemp_);
+      //std::vector< SiPixelTemplateStore > thePixelTemp_;
+      //SiPixelTemplate templ(thePixelTemp_);
 
       // need to find the name of all of these variables
       // look around for the cluster information
       // if not, we can calculate it ourselves (z/x)
       // defined in HSCP
-
-      // unclear if these are needed.
-      /*static float qscale, qscaleB, qscaleF;
-      qscaleB=1., qscaleF=1.;
-      printf("bpix scale factor = %f, fpix scale factor = %f \n", qscaleB, qscaleF);
-
-      bpix = true;
-            if(ana->ClDisk[iCl] < -10) {
-              qscale = qscaleB;
-              layer = ana->ClLayer[iCl];
-              }
-
-            else {
-              bpix = false;
-              qscale = qscaleF; } */
         
       // template analysis
 
       // Local variables (from hscp)
       bool ydouble[TYSIZE], xdouble[TXSIZE];
-      static float qscale, qscaleB, qscaleF, pcut, tkpcut, probQ, /*xs, ys,*/ probQonTrack, probQonTrackTerm, probXYonTrack, probXYonTrackTerm, dEdxEstimator;
-      static float probQonTrackWMulti, probXYonTrackWMulti, corrFactor;
-      static float xhit, yhit, xrec, yrec, sigmax, sigmay, probx, proby, cotalpha, cotbeta, locBx, locBz, xoff, yoff, xtemp, ytemp;  
-      static int /*sfile, nrun, external,*/ size, sizex, sizey, layer, llayer, /*module, ladder, offladder, side,*/ disk, /*blade, onblade,*/ panel, lowpt;
-    //   static int tladp1[4], qlad[4]={3, 7, 11, 16};
-      static int lumiMin = 100000, lumiMax = 0;
-      static vector<int> nbin(5,0);
+      int mrow = TXSIZE, mcol = TYSIZE;
+      float cluster[TXSIZE][TYSIZE];
+      float qscale, probQ;
+      float xhit, yhit, xrec, yrec, sigmax, sigmay, probx, proby, cotalpha, cotbeta, locBx, locBz, xoff, yoff, xtemp, ytemp;  
       int i, j, ierr, ierr2, qbin;
       bool bpix;
-      // more defs from hscp
       double log10probXY, log10probQ, log10probXYQ, logprobQonTrackWMulti, logprobXYonTrackWMulti, qclust, qnorm, qnormcorr, proba, probXY, probXYQ, dx, dy, TkP, xhmod, yhmod;
-      static int iy, ix, ngood, nbad, speed, /*IDF1,*/ ring;
-        // Other inits
-      xpitch = 100;
-      ypitch = 150;
-      speed = -2;
-      ngood = 0; nbad = 0;
+      static int iy, ix, ngood, nbad, speed, ring;
 
-      // 1D templat analysis
-      SiPixelTemplateReco::ClusMatrix clusterPayload{&cluster[0][0], xdouble, ydouble, mrow,mcol};
+      // calculate cotalpha, cotbeta (currently guesses)
+      cotalpha = clustLocalCoordinates.x() / clustGlobalCoordinates.z();
+      cotbeta = clustLocalCoordinates.y() / clustGlobalCoordinates.z();
+
+      // 1D template analysis
+      //SiPixelTemplateReco::ClusMatrix clusterPayload{&cluster[0][0], xdouble, ydouble, mrow, mcol}; //3d histogram
+      // take the cluster[ix][iy] = 
+      // value of each cluster pixel should be the digi charge
+      // extracting the digis overall might be hard
+      // go ahead with qscale 
       locBx = 1.;
       if(cotbeta < 0.) locBx = -1.;
       locBz = locBx;
       if(cotalpha < 0.) locBz = -locBx;
       
       int TemplID1 = -9999;
-      TemplID1 = templateDBobject_->getTemplateID(ana->ClDetId[iCl]); // this will need fix
-      templ.interpolate(TemplID1, 0.f, 0.f, 1.f, 1.f);
+      std::vector< SiPixelTemplateStore > thePixelTemp_;
+
+      if (!SiPixelTemplate::pushfile(*templateDBobject_, thePixelTemp_))
+      cout << "\nERROR: Templates not filled correctly. Check the sqlite file. Using SiPixelTemplateDBObject version "
+        << (*templateDBobject_).version() << "\n\n"; 
+
+      SiPixelTemplate templ(thePixelTemp_); // maybe this should go before the file push??? 
+
+      //if (templ.qscale != 0) cout << "template qscale initailized to non-zero value (before loading). may be a memory error" << std::endl;
+      //float tempqscale = templ.qscale; // could be something, but won't be correct - does not currently know where you are in the detector
+
+      TemplID1 = templateDBobject_->getTemplateID(detId); // changed using local info, currently causing crash
+      // the template object has all the calibration - sensitive to which layer its in
+      // you need to know which part of the detector you're in
+      templ.interpolate(TemplID1, 0.f, 0.f, 1.f, 1.f); // because the calibration is done discretely 
+      cout << "qscale: " << templ.qscale() << std::endl;
+      cout << "q_r_qmeas_qtrue: " << templ.r_qMeas_qTrue() << std::endl;
+
+
+      templ.interpolate(TemplID1, cotalpha, cotbeta, locBz, locBx);
+      cout << "qscale: " << templ.qscale() << std::endl;
+      cout << "q_r_qmeas_qtrue: " << templ.r_qMeas_qTrue() << std::endl;
+      // now templ will know where we are
+      // now templ.qscale will make sense
+      // you just want to make sure that the template is initialized to the right template ID
+      // see if we can get the rq_rmeas 
+      // you know calibration of eta = 1, 1.1 - okay 
 
       // Running the actualy 1D Template Reco
-      ierr = PixelTempReco1D(TemplID1, // defined above
-                              cotalpha, // FIX
-                              cotbeta,  // FIX
+      /*ierr = PixelTempReco1D(TemplID1, // defined above (causing crash) - this is where
+                              cotalpha, // (use kinematic position info)
+                              cotbeta,  // (use kinematic position info)
                               locBz,    // defined above
                               locBx,    // defined above
-                              clusterPayload, // defined above 
-                              templ,   // da
-                              yrec,  // FIX
-                              sigmay,  // FIX
-                              proby,  // FIX
-                              xrec,  // FIX
-                              sigmax,  // FIX
-                              probx, // FIX
-                              qbin,  // FIX
-                              speed, // FIX
-                              probQ); // FIX 
-      cout << "Template reco success/failiure: " < ierr < "\n"
+                              clusterPayload, // FIX - needs nicer inputs 
+                              templ,   // INPUT
+                              yrec,  // OUTPUT
+                              sigmay,
+                              proby, 
+                              xrec,  
+                              sigmax,
+                              probx, 
+                              qbin,  
+                              speed, 
+                              probQ); 
+      cout << "Template reco success/failiure: " << ierr << "\n"; 
+      // qscale value should have 13 values, many times - only based on detiD - range 1 to 1.3 ish
 
-      // corrFactor = (templ.qscale())/templ.r_qMeas_qTrue();
-      //clu_.charge_corr = currentCluster.charge * corrFactor;
+      if (templ.qscale == tempqscale && ierr != 0) cout << "qscale didn't change even though template reco was success." << std::endl; */
+
+      static float corrFactor = (templ.qscale())/templ.r_qMeas_qTrue();
+      clu_.charge_corr = currentCluster.charge() * corrFactor; 
       //templ.qscale()
       // check: normalized charge ?
-      qnorm = qclust/sqrt((double)(1.+cotbeta*cotbeta+cotalpha*cotalpha));
-      if(qnorm < 10000.) continue;
+      //qnorm = currentCluster.charge()/sqrt((double)(1.+cotbeta*cotbeta+cotalpha*cotalpha)); // is this needed?
 
-      clu_.charge_corr = templ.qscale();
+      //clu_.charge_corr = templ.qscale();
 
       // Misc.
       for(int i = 0; i < clu_.size && i < 1000; ++i) {
