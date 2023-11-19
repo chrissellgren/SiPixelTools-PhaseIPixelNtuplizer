@@ -334,13 +334,18 @@ public:
   int   tworoc;   // set if there is a valid hit
   int   size;
   float charge;
+  float charge_qscale;
+  float charge_r_qmeas_qtrue;
   float charge_corr;
+  float qscale;
+  float r_qmeas_qtrue;
+  float corr_factor;
   // adc must be the last variable of the branch
   float adc[1000];
   float pix[1000][2];
 
   const std::string list =
-    "x/F:y:lx:ly:glx:gly:glz:sizeX/I:sizeY:i:edge:badpix:tworoc:size:charge/F:charge_corr/F";
+    "x/F:y:lx:ly:glx:gly:glz:sizeX/I:sizeY:i:edge:badpix:tworoc:size:charge/F:charge_qscale:charge_r_qmeas_qtrue:charge_corr:qscale:r_qmeas_qtrue:corr_factor";
 
   ClustData() { init(); }
 

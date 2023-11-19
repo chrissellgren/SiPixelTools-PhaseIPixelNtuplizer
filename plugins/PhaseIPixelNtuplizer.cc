@@ -1115,17 +1115,20 @@ void PhaseIPixelNtuplizer::getClustData
       //if (templ.qscale != 0) cout << "template qscale initailized to non-zero value (before loading). may be a memory error" << std::endl;
       //float tempqscale = templ.qscale; // could be something, but won't be correct - does not currently know where you are in the detector
 
-      TemplID1 = templateDBobject_->getTemplateID(detId); // changed using local info, currently causing crash
+      TemplID1 = templateDBobject_->getTemplateID(detId); // changed using local info
       // the template object has all the calibration - sensitive to which layer its in
       // you need to know which part of the detector you're in
       templ.interpolate(TemplID1, 0.f, 0.f, 1.f, 1.f); // because the calibration is done discretely 
-      cout << "qscale: " << templ.qscale() << std::endl;
-      cout << "q_r_qmeas_qtrue: " << templ.r_qMeas_qTrue() << std::endl;
+      cout << "templID: " << TemplID1 << ", qscale: " << templ.qscale() << std::endl;
+      //cout << "qscale: " << templ.qscale() << std::endl;
+      float r_qmeas_qtrue_comp = templ.r_qMeas_qTrue();
+      //cout << "q_r_qmeas_qtrue: " << templ.r_qMeas_qTrue() << ", after interpolation: ";
 
 
       templ.interpolate(TemplID1, cotalpha, cotbeta, locBz, locBx);
-      cout << "qscale: " << templ.qscale() << std::endl;
-      cout << "q_r_qmeas_qtrue: " << templ.r_qMeas_qTrue() << std::endl;
+      r_qmeas_qtrue_comp /= templ.r_qMeas_qTrue();
+      //out << "qscale: " << templ.qscale() << std::endl;
+      cout << "ratio of rqmeasqtrue b/a interp = " << templ.r_qMeas_qTrue() << std::endl;
       // now templ will know where we are
       // now templ.qscale will make sense
       // you just want to make sure that the template is initialized to the right template ID
@@ -1153,7 +1156,7 @@ void PhaseIPixelNtuplizer::getClustData
       // qscale value should have 13 values, many times - only based on detiD - range 1 to 1.3 ish
 
       if (templ.qscale == tempqscale && ierr != 0) cout << "qscale didn't change even though template reco was success." << std::endl; */
-
+      clu_.charge_qscale = currentCluster.charge() * templ.qscale();
       static float corrFactor = (templ.qscale())/templ.r_qMeas_qTrue();
       clu_.charge_corr = currentCluster.charge() * corrFactor; 
       //templ.qscale()
