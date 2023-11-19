@@ -158,8 +158,9 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
     (iConfig.getParameter<edm::InputTag>("trajectoryInput"));
   measurementTrackerEventToken_ = consumes<MeasurementTrackerEvent>
     (edm::InputTag("MeasurementTrackerEvent"));
-  
-  templateDBobjectToken_ = esConsumes<edm::Transition::Event>();
+
+  templateStoreToken_    = esConsumes<edm::Transition::BeginRun>();
+  templateDBobjectToken_ = esConsumes<edm::Transition::BeginRun>();
 
   // Save digi tree only if saveDigiTree_ option is set
 #if ADD_SIM_INFO >0
@@ -421,6 +422,8 @@ void PhaseIPixelNtuplizer::endJob()
 
 void PhaseIPixelNtuplizer::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {
   // iRun.getByToken(conditionsInRunBlockToken_,  conditionsInRunBlock_);
+    templateDBobject_ = &iSetup.getData(templateDBobjectToken_);
+    thePixelTemp_ = &iSetup.getData(templateStoreToken_);
 }
 
 void PhaseIPixelNtuplizer::endRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {}
@@ -467,13 +470,13 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 
   // create token (using grammar of PR)
   //const edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
-  templateDBobject_ = &iSetup.getData(templateDBobjectToken_); 
+  //templateDBobject_ = &iSetup.getData(templateDBobjectToken_); 
   // 
   //templateDBobject_ = templateDBobject.product();
   //std::vector< SiPixelTemplateStore > thePixelTemp_;
   //SiPixelTemplate templ(thePixelTemp_);
 
-  cout << " ---------  PixelCPETemplateReco: Loading templates from database (DB) --------- " << endl;
+  //cout << " ---------  PixelCPETemplateReco: Loading templates from database (DB) --------- " << endl;
   // the pushfile was causing a crash - remove temporarily.
   /*if (!SiPixelTemplate::pushfile(*templateDBobject_, thePixelTemp_))
       cout << "\nERROR: Templates not filled correctly. Check the sqlite file. Using SiPixelTemplateDBObject version "
@@ -1078,17 +1081,17 @@ void PhaseIPixelNtuplizer::getClustData
       // template analysis // 
 
       // Local variables (from hscp)
-      bool ydouble[TYSIZE], xdouble[TXSIZE];
-      int mrow = TXSIZE, mcol = TYSIZE;
-      float cluster[TXSIZE][TYSIZE];
-      float qscale, probQ;
-      float xhit, yhit, xrec, yrec, sigmax, sigmay, probx, proby, cotalpha, cotbeta, locBx, locBz, xoff, yoff, xtemp, ytemp;  
-      int i, j, ierr, ierr2, qbin;
-      bool bpix;
-      double log10probXY, log10probQ, log10probXYQ, logprobQonTrackWMulti, logprobXYonTrackWMulti, qclust, qnorm, qnormcorr, proba, probXY, probXYQ, dx, dy, TkP, xhmod, yhmod;
-      static int iy, ix, ngood, nbad, speed, ring;
+      //bool ydouble[TYSIZE], xdouble[TXSIZE];
+      //int mrow = TXSIZE, mcol = TYSIZE;
+      //float cluster[TXSIZE][TYSIZE];
+      //float qscale;
+      float /*xhit, yhit, xrec, yrec, sigmax, sigmay, probx, proby,*/cotalpha, cotbeta, locBx, locBz/*, xoff, yoff, xtemp, ytemp*/;  
+      //int i, j, ierr, ierr2, qbin;
+      //bool bpix;
+      //double log10probXY, log10probQ, log10probXYQ, logprobQonTrackWMulti, logprobXYonTrackWMulti, qclust, qnorm, qnormcorr, proba, probXY, probXYQ, dx, dy, TkP, xhmod, yhmod;
+      //static int iy, ix, ngood, nbad, speed, ring;
 
-      // calculate cotalpha, cotbeta (currently guesses)
+      // calculate cotalpha, cotbeta 
       cotalpha = clustLocalCoordinates.x() / clustGlobalCoordinates.z();
       cotbeta = clustLocalCoordinates.y() / clustGlobalCoordinates.z();
 
@@ -1097,20 +1100,19 @@ void PhaseIPixelNtuplizer::getClustData
       // take the cluster[ix][iy] = 
       // value of each cluster pixel should be the digi charge
       // extracting the digis overall might be hard
-      // go ahead with qscale 
       locBx = 1.;
       if(cotbeta < 0.) locBx = -1.;
       locBz = locBx;
       if(cotalpha < 0.) locBz = -locBx;
       
       int TemplID1 = -9999;
-      std::vector< SiPixelTemplateStore > thePixelTemp_;
-
+      
+      /*std::vector< SiPixelTemplateStore > thePixelTemp_;
       if (!SiPixelTemplate::pushfile(*templateDBobject_, thePixelTemp_))
       cout << "\nERROR: Templates not filled correctly. Check the sqlite file. Using SiPixelTemplateDBObject version "
-        << (*templateDBobject_).version() << "\n\n"; 
+        << (*templateDBobject_).version() << "\n\n"; */
 
-      SiPixelTemplate templ(thePixelTemp_); // maybe this should go before the file push??? 
+      SiPixelTemplate templ(*thePixelTemp_); // maybe this should go before the file push??? 
 
       //if (templ.qscale != 0) cout << "template qscale initailized to non-zero value (before loading). may be a memory error" << std::endl;
       //float tempqscale = templ.qscale; // could be something, but won't be correct - does not currently know where you are in the detector
@@ -1118,17 +1120,17 @@ void PhaseIPixelNtuplizer::getClustData
       TemplID1 = templateDBobject_->getTemplateID(detId); // changed using local info
       // the template object has all the calibration - sensitive to which layer its in
       // you need to know which part of the detector you're in
-      templ.interpolate(TemplID1, 0.f, 0.f, 1.f, 1.f); // because the calibration is done discretely 
-      cout << "templID: " << TemplID1 << ", qscale: " << templ.qscale() << std::endl;
+      //templ.interpolate(TemplID1, 0.f, 0.f, 1.f, 1.f); // because the calibration is done discretely 
+      //cout << "templID: " << TemplID1 << ", qscale: " << templ.qscale() << std::endl;
       //cout << "qscale: " << templ.qscale() << std::endl;
-      float r_qmeas_qtrue_comp = templ.r_qMeas_qTrue();
+      //float r_qmeas_qtrue_comp = templ.r_qMeas_qTrue();
       //cout << "q_r_qmeas_qtrue: " << templ.r_qMeas_qTrue() << ", after interpolation: ";
 
 
       templ.interpolate(TemplID1, cotalpha, cotbeta, locBz, locBx);
-      r_qmeas_qtrue_comp /= templ.r_qMeas_qTrue();
+      //r_qmeas_qtrue_comp /= templ.r_qMeas_qTrue();
       //out << "qscale: " << templ.qscale() << std::endl;
-      cout << "ratio of rqmeasqtrue b/a interp = " << templ.r_qMeas_qTrue() << std::endl;
+      //cout << "ratio of rqmeasqtrue b/a interp = " << templ.r_qMeas_qTrue() << std::endl;
       // now templ will know where we are
       // now templ.qscale will make sense
       // you just want to make sure that the template is initialized to the right template ID
@@ -1156,14 +1158,16 @@ void PhaseIPixelNtuplizer::getClustData
       // qscale value should have 13 values, many times - only based on detiD - range 1 to 1.3 ish
 
       if (templ.qscale == tempqscale && ierr != 0) cout << "qscale didn't change even though template reco was success." << std::endl; */
+      static float corrFactor = templ.qscale()/templ.r_qMeas_qTrue();
+      clu_.qscale = templ.qscale();
+      clu_.r_qmeas_qtrue = templ.r_qMeas_qTrue();
+      clu_.corr_factor = corrFactor;
       clu_.charge_qscale = currentCluster.charge() * templ.qscale();
-      static float corrFactor = (templ.qscale())/templ.r_qMeas_qTrue();
+      clu_.charge_r_qmeas_qtrue = currentCluster.charge() / templ.r_qMeas_qTrue();
       clu_.charge_corr = currentCluster.charge() * corrFactor; 
-      //templ.qscale()
+      
       // check: normalized charge ?
       //qnorm = currentCluster.charge()/sqrt((double)(1.+cotbeta*cotbeta+cotalpha*cotalpha)); // is this needed?
-
-      //clu_.charge_corr = templ.qscale();
 
       // Misc.
       for(int i = 0; i < clu_.size && i < 1000; ++i) {

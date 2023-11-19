@@ -97,7 +97,7 @@
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
 // changed for corrected charge 10/22/23
-#include "../interface/DataStructures_v10.h" // 2020 December 12, CMSSW_10_6_X and up
+#include "../interface/DataStructures_v10.h" // 2023 December 1, CMSSW_13_0_X and up
 
 // SiPixelCoordinates: new class for plotting Phase 0/1 Geometry
 #include "DQM/SiPixelPhase1Common/interface/SiPixelCoordinates.h"
@@ -148,6 +148,9 @@
 #include "CondFormats/SiPixelObjects/interface/SiPixelTemplateDBObject.h"
 #include "CondFormats/SiPixelTransient/interface/SiPixelTemplate.h"
 
+// from sipixelphase1trackclusters.cc
+#include "DQM/SiPixelPhase1Common/interface/SiPixelPhase1Base.h"
+
 
 // Compiler directives
 #define EDM_ML_LOGDEBUG
@@ -186,11 +189,17 @@ public:
   virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-  const SiPixelTemplateDBObject* templateDBobject_;
 
 private:
   edm::ParameterSet iConfig_;
   std::string ntupleOutputFilename_;
+
+  const SiPixelTemplateDBObject* templateDBobject_ = nullptr;
+  const std::vector<SiPixelTemplateStore>* thePixelTemp_ = nullptr;
+
+  edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
+  edm::ESGetToken<std::vector<SiPixelTemplateStore>, SiPixelTemplateDBObjectESProducerRcd> templateStoreToken_;
+
 
   // States
   int isEventFromMc_;
@@ -274,7 +283,7 @@ private:
   edm::EDGetTokenT<edm::ValueMap<std::vector<float>>>       distanceToken_;
   edm::EDGetTokenT<edm::View<reco::Track>>                  muonTracksToken_;
   
-  edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
+  //edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
 
   // Handles
   edm::Handle<edm::View<reco::Track>> muonTrackCollectionHandle_;
