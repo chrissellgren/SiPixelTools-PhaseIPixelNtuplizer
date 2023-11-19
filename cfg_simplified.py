@@ -40,7 +40,7 @@ process.configurationMetadata = cms.untracked.PSet(
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run3_data_prompt', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '132X_dataRun3_Prompt_v4', '')
 
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
@@ -63,7 +63,7 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 #---------------------------
 process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     trajectoryInput = cms.InputTag('TrackRefitter'),
-    outputFileName = cms.untracked.string("Ntuple_qcorr.root"),
+    outputFileName = cms.untracked.string("Ntuple_qcorr_noreco.root"),
     # Global muon collection
     muonCollection                 = cms.InputTag("muons"),
     keepAllGlobalMuons             = cms.untracked.bool(True),
