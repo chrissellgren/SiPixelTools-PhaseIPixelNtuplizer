@@ -159,7 +159,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
   measurementTrackerEventToken_ = consumes<MeasurementTrackerEvent>
     (edm::InputTag("MeasurementTrackerEvent"));
 
-  templateStoreToken_    = esConsumes<edm::Transition::BeginRun>();
+  //templateStoreToken_    = esConsumes<edm::Transition::BeginRun>();
   templateDBobjectToken_ = esConsumes<edm::Transition::BeginRun>();
 
   // Save digi tree only if saveDigiTree_ option is set
@@ -423,7 +423,10 @@ void PhaseIPixelNtuplizer::endJob()
 void PhaseIPixelNtuplizer::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {
   // iRun.getByToken(conditionsInRunBlockToken_,  conditionsInRunBlock_);
     templateDBobject_ = &iSetup.getData(templateDBobjectToken_);
-    thePixelTemp_ = &iSetup.getData(templateStoreToken_);
+    if (!SiPixelTemplate::pushfile(*templateDBobject_, thePixelTemp_))
+    cout << "\nERROR: Templates not filled correctly. Check the sqlite file. Using SiPixelTemplateDBObject version "
+      << (*templateDBobject_).version() << "\n\n";
+    //thePixelTemp_ = &iSetup.getData(templateStoreToken_);
 }
 
 void PhaseIPixelNtuplizer::endRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {}
@@ -1106,13 +1109,8 @@ void PhaseIPixelNtuplizer::getClustData
       if(cotalpha < 0.) locBz = -locBx;
       
       int TemplID1 = -9999;
-      
-      /*std::vector< SiPixelTemplateStore > thePixelTemp_;
-      if (!SiPixelTemplate::pushfile(*templateDBobject_, thePixelTemp_))
-      cout << "\nERROR: Templates not filled correctly. Check the sqlite file. Using SiPixelTemplateDBObject version "
-        << (*templateDBobject_).version() << "\n\n"; */
 
-      SiPixelTemplate templ(*thePixelTemp_); // maybe this should go before the file push??? 
+      SiPixelTemplate templ(thePixelTemp_); // maybe this should go before the file push??? 
 
       //if (templ.qscale != 0) cout << "template qscale initailized to non-zero value (before loading). may be a memory error" << std::endl;
       //float tempqscale = templ.qscale; // could be something, but won't be correct - does not currently know where you are in the detector

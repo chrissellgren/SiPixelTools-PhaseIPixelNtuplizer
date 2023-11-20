@@ -194,11 +194,11 @@ private:
   edm::ParameterSet iConfig_;
   std::string ntupleOutputFilename_;
 
-  const SiPixelTemplateDBObject* templateDBobject_ = nullptr;
-  const std::vector<SiPixelTemplateStore>* thePixelTemp_ = nullptr;
+  const SiPixelTemplateDBObject* templateDBobject_;
+  std::vector<SiPixelTemplateStore> thePixelTemp_;
 
   edm::ESGetToken<SiPixelTemplateDBObject, SiPixelTemplateDBObjectESProducerRcd> templateDBobjectToken_;
-  edm::ESGetToken<std::vector<SiPixelTemplateStore>, SiPixelTemplateDBObjectESProducerRcd> templateStoreToken_;
+  //edm::ESGetToken<std::vector<SiPixelTemplateStore>, SiPixelTemplateDBObjectESProducerRcd> templateStoreToken_;
 
 
   // States
