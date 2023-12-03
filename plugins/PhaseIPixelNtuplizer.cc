@@ -1156,7 +1156,7 @@ void PhaseIPixelNtuplizer::getClustData
       // qscale value should have 13 values, many times - only based on detiD - range 1 to 1.3 ish
 
       if (templ.qscale == tempqscale && ierr != 0) cout << "qscale didn't change even though template reco was success." << std::endl; */
-      static float corrFactor = templ.qscale()/templ.r_qMeas_qTrue();
+      float corrFactor = templ.qscale()/templ.r_qMeas_qTrue();
       clu_.qscale = templ.qscale();
       clu_.r_qmeas_qtrue = templ.r_qMeas_qTrue();
       clu_.corr_factor = corrFactor;

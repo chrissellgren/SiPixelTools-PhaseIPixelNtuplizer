@@ -7,6 +7,10 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.Eras.Era_Run3_cff import Run3
 
+from FWCore.ParameterSet.VarParsing import VarParsing
+options = VarParsing('analysis')
+options.outputFile = 'ntuple.root'
+
 process = cms.Process('RERECO',Run3)
 
 # import of standard configurations
@@ -28,7 +32,8 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('/store/data/Run2023D/Muon0/ALCARECO/SiPixelCalSingleMuonLoose-PromptReco-v2/000/370/664/00000/fca88e0f-0a16-4a28-8eb2-5bbfd8ec39b5.root')
+    #fileNames = cms.untracked.vstring('/store/data/Run2023D/Muon0/ALCARECO/SiPixelCalSingleMuonLoose-PromptReco-v2/000/370/664/00000/fca88e0f-0a16-4a28-8eb2-5bbfd8ec39b5.root')
+    fileNames = cms.untracked.vstring('/store/data/Run2023D/Muon0/ALCARECO/SiPixelCalSingleMuonLoose-PromptReco-v1/000/369/869/00000/c1f8f13a-49be-493e-b59b-38af908719a5.root')
 )
 
 # Production Info
@@ -63,7 +68,7 @@ process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
 #---------------------------
 process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     trajectoryInput = cms.InputTag('TrackRefitter'),
-    outputFileName = cms.untracked.string("Ntuple_qcorr_noreco.root"),
+    outputFileName = cms.untracked.string(options.outputFile),
     # Global muon collection
     muonCollection                 = cms.InputTag("muons"),
     keepAllGlobalMuons             = cms.untracked.bool(True),
